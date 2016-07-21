@@ -1,4 +1,4 @@
-ervices:
+services:
   - redis
   - mysql
   - docker
