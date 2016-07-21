@@ -8,7 +8,13 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-                                                       
+  
+/**
+ * growingio的信息获取接口
+ * 
+ * @author likai
+ *
+ */  
 @FeignClient(name = "${kefu.growingio.name}Event", url = "${kefu.growingio.url.event}")
 public interface IGrowingRemoteEventService {
 	

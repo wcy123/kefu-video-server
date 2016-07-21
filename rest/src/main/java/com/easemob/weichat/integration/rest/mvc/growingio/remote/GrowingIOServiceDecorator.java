@@ -89,11 +89,25 @@ public class GrowingIOServiceDecorator  {
 	@Autowired
 	private GrowingTenantRepository growingTenantRepository ;
 		
+	
+	
+	/**
+	 * 清除Redis保存的accesstoken
+	 * 
+	 * @author likai
+	 *
+	 */
 	private void clearGrowingEnvironment(int tetenantId){
 		String token = String.format(INTEGATION_TOPIC,tetenantId);
 		stringRedisTemplate.delete(token);
 	}
 
+	/**
+	 * 设置Redis保存的accesstoken
+	 * 
+	 * @author likai
+	 *
+	 */
 	private void setGrowingAccessToken(int tetenantId ,String accessToken,long expire){
 		String key = String.format(INTEGATION_TOPIC, tetenantId);
 		stringRedisTemplate.boundValueOps(key).setIfAbsent(accessToken);
@@ -104,7 +118,14 @@ public class GrowingIOServiceDecorator  {
 		}
 		
 	}
-
+	
+	
+	/**
+	 * growingio 注册接口
+	 * 
+	 * @author likai
+	 *
+	 */
 	public ResponseEntity<DelegateRegisterDataResp> delegateRegister(DelegateRegisterDataReq req, int tenantId ){
 		clearGrowingEnvironment( tenantId); 
 		ResponseEntity<DelegateRegisterDataResp> resp = growingRemoteService.delegateRegister(req, String.format(INTEGATION_OATH_FOMAT, client_id,client_secret));
@@ -114,12 +135,12 @@ public class GrowingIOServiceDecorator  {
 		return resp;
 	}
 	
-	public String  analyzeFeignException(FeignException e){
-		int index = e.getMessage().indexOf("content:") + "content:".length();
-		return e.getMessage().substring(index);
-	}
-	
-
+	/**
+	 * growingio installSDK接口
+	 * 
+	 * @author likai
+	 *
+	 */
 	public ResponseEntity<InstallSdkResp> installSdk(InstallSdkReq req, String projectId,int tenantId) {
 		String baseurl = String.format("/widgets/projects/%s/install_sdk", projectId);
 		Map<String, String> map = Maps.newTreeMap() ;
@@ -130,6 +151,19 @@ public class GrowingIOServiceDecorator  {
 		return remoteGrowingInstallSdk(req,baseurl,tenantId,url,map,projectId);
 	}
 	
+	public String  analyzeFeignException(FeignException e){
+		int index = e.getMessage().indexOf("content:") + "content:".length();
+		return e.getMessage().substring(index);
+	}
+	
+
+	
+	/**
+	 * 调用growingid的installSDK接口
+	 * 
+	 * @author likai
+	 *
+	 */
 	private ResponseEntity<InstallSdkResp> remoteGrowingInstallSdk(InstallSdkReq req,String baseurl,int tenantId,String url ,Map<String, String> map ,String projectId) {
 		ResponseEntity<InstallSdkResp> resp = null ;
 		int loop = 0;
@@ -164,6 +198,13 @@ public class GrowingIOServiceDecorator  {
 		return resp ;
 	}
 	
+	
+	/**
+	 * 提供growingio的Dashboard
+	 * 
+	 * @author likai
+	 *
+	 */
 	public ResponseEntity<DashboardResp> dashboard(DashboardReq req, int tenantId){
 		String baseurl = "/widgets/dashboard";
 		Map<String, String> map = Maps.newTreeMap() ;
@@ -171,6 +212,12 @@ public class GrowingIOServiceDecorator  {
 		return remoteGrowingDashboard(url,baseurl,map,req, tenantId);
 	}
 	
+	/**
+	 * 得到dashboard的签名url
+	 * 
+	 * @author likai
+	 *
+	 */
 	private String getDashBoardInfo(Object req, String baseurl,int tenantId,Map<String, String> map) {
 		String url = "";
 		try{
@@ -189,6 +236,12 @@ public class GrowingIOServiceDecorator  {
 		return url ; 
 	}
 	
+	/**
+	 * growingio接口dashboard
+	 * 
+	 * @author likai
+	 *
+	 */
 	private ResponseEntity<DashboardResp> remoteGrowingDashboard(String url ,String baseurl,Map<String, String> map,DashboardReq req, int tenantId) {
 		ResponseEntity<DashboardResp> resp = null ;
 		int loop = 0;
@@ -225,6 +278,12 @@ public class GrowingIOServiceDecorator  {
 	}
 	
 	
+	/**
+	 * 返回会话轨迹的json
+	 * 
+	 * @author likai
+	 *
+	 */
 	public ResponseEntity<String> event(EventReq req){
 		ResponseEntity<String> resp = null ;
 		try{
@@ -238,6 +297,12 @@ public class GrowingIOServiceDecorator  {
 	}
 	
 	
+	/**
+	 * 生成Outh2.0的签名
+	 * 
+	 * @author likai
+	 *
+	 */
 	private String getSign(HttpMethod method,String base_uri , Object param,String accessToken)  {
 		String sign = "";
 		try{
@@ -266,6 +331,12 @@ public class GrowingIOServiceDecorator  {
 		return sign ;   
 	}
 	
+	/**
+	 * 得到当前accesstoken，如果失效，通过upaccesstoken接口重新获取
+	 * 
+	 * @author likai
+	 *
+	 */
 	private String getAccessToken(int tenantId, boolean isInit) {
 		
 		String accessToken = "";
@@ -293,7 +364,12 @@ public class GrowingIOServiceDecorator  {
 	}
 	
 	
-	
+	/**
+	 * growing接口 update  accesstoken
+	 * 
+	 * @author likai
+	 *
+	 */
     private String processAccessToken(int tenantId){
     	String accessToken = "";
     	String refAccessToken = getrefAccessTokenForTeanan(tenantId);
@@ -318,6 +394,12 @@ public class GrowingIOServiceDecorator  {
     }
     
     
+    /**
+	 * 通过反射，得到某对象的属性值
+	 * 
+	 * @author likai
+	 *
+	 */
     public Method getDeclaredMethod(Object object, String fieldName){
         Method field = null;
         Class<?> clazz = object.getClass();
@@ -338,6 +420,12 @@ public class GrowingIOServiceDecorator  {
 		return  field ;
     }
 
+    /**
+	 * 通过反射，设置某对象的属性值
+	 * 
+	 * @author likai
+	 *
+	 */
     public void setFieldValue(Object orig, String field, Object value){
 
         String setfunc = "set" + field.substring(0, 1).toUpperCase() + field.substring(1);
@@ -351,6 +439,13 @@ public class GrowingIOServiceDecorator  {
         }
     }
 
+    
+    /**
+  	 * 通过反射，将对象的所有值都放在map中
+  	 * 
+  	 * @author likai
+  	 *
+  	 */
     public void getValue(Object source, Map<String, String> map) {
 
 		if (source != null) {
@@ -394,7 +489,12 @@ public class GrowingIOServiceDecorator  {
     	return String.format("%s%s?%s", remoteUrl,baseurl,param) ;
     }
     
-     
+    /**
+  	 * HMACSHA1算法实现
+  	 * 
+  	 * @author likai
+  	 *
+  	 */
     private static class HMACSHA1 {  
     	  
         private HMACSHA1(){

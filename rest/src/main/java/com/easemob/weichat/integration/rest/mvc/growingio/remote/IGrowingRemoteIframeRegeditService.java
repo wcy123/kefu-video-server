@@ -14,7 +14,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import com.easemob.weichat.integration.modes.DashboardResp;
 import com.easemob.weichat.integration.modes.InstallSdkResp;
 
-                                                       
+       
+/**
+ * growingio的初始化类接口
+ * 
+ * @author likai
+ *
+ */  
 @FeignClient(name = "${kefu.growingio.name}Regedit", url = "${kefu.growingio.url.iframe}")
 public interface IGrowingRemoteIframeRegeditService {
 	

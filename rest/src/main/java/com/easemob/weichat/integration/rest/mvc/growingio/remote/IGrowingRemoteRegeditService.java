@@ -13,7 +13,12 @@ import com.easemob.weichat.integration.modes.DelegateRegisterDataResp;
 import com.easemob.weichat.integration.modes.UpdateRegisterDataReq;
 import com.easemob.weichat.integration.modes.UpdateRegisterDataResp;
 
-                                                       
+/**
+ * growingio的账户管理类接口
+ * 
+ * @author likai
+ *
+ */                                          
 @FeignClient(name = "${kefu.growingio.name}Regedit", url = "${kefu.growingio.url.regedit}")
 public interface IGrowingRemoteRegeditService {
 	
