@@ -123,7 +123,7 @@ public class GrowingIOServiceController extends AbstractController  {
 	    }
 
 	 
-	    protected ResponseEntity<IntegrationResp> createSucResponse(Object entity, HttpStatus httpStatus) {
+	private ResponseEntity<IntegrationResp> createSucResponse(Object entity, HttpStatus httpStatus) {
 	    	IntegrationResp response = new IntegrationResp();
 	        response.setStatus(IntegrationResp.STATUS_OK);
 	        if(entity.getClass().equals(Page.class)){
@@ -135,25 +135,7 @@ public class GrowingIOServiceController extends AbstractController  {
 	        return new ResponseEntity<IntegrationResp>(response, httpStatus);
 	    }
 
-	    protected ResponseEntity<ApiResponse> createResponseEntity(Page<?> page) {
-	        ApiResponse response = new ApiResponse();
-	        response.setStatus(ApiResponse.STATUS_OK);
-	        response.setFirst(page.isFirst());
-	        response.setLast(page.isLast());
-	        response.setTotalPages(page.getTotalPages());
-	        response.setTotalElements(page.getTotalElements());
-	        response.setSize(page.getSize());
-	        response.setNumber(page.getNumber());
-	        response.setNumberOfElements(page.getNumberOfElements());
-	        response.setEntities(page.getContent());
-	        if(response.getNumberOfElements() == 0){
-	                return new ResponseEntity<ApiResponse>(response, HttpStatus.OK);
-	        }else{
-	                return new ResponseEntity<ApiResponse>(response, HttpStatus.NOT_FOUND);
-	        }
-
-	    }
-
+	 
 
 	
 }
