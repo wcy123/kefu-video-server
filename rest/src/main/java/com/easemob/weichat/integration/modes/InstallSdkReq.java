@@ -4,8 +4,8 @@ import lombok.Data;
 
 @Data
 public class InstallSdkReq {
-	private String client_id ;
+	private String clientId ;
 	private long timestamp ; 
-	private String user_id ;
+	private String userId ;
 	private String sign ; 
 }

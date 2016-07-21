@@ -1,25 +1,17 @@
 package com.easemob.weichat.integration.rest.mvc.growingio.jpa;
 
-import java.util.Date;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
-
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
 import com.easemob.weichat.models.entity.User;
 import com.easemob.weichat.models.enums.AgentOnLineStatus;
 import com.easemob.weichat.models.enums.UserStatus;
 import com.easemob.weichat.models.enums.UserType;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import lombok.Data;
