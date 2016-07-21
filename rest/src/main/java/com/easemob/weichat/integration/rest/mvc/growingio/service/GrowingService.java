@@ -25,7 +25,7 @@ import com.easemob.weichat.integration.modes.EventReq;
 import com.easemob.weichat.integration.modes.GrowingIoInfo;
 import com.easemob.weichat.integration.modes.InstallSdkReq;
 import com.easemob.weichat.integration.modes.InstallSdkResp;
-import com.easemob.weichat.integration.modes.IntegrationResponse;
+import com.easemob.weichat.integration.modes.IntegrationResp;
 import com.easemob.weichat.integration.modes.IntgerationGrowingInfo;
 import com.easemob.weichat.integration.rest.mvc.growingio.jpa.GrowingIoCompanyRepository;
 import com.easemob.weichat.integration.rest.mvc.growingio.jpa.ServicesessionTrackRepository;
@@ -76,7 +76,7 @@ public class GrowingService implements IGrowingService{
 	private  String client_secret;
 	
 	@Override
-	public IntegrationStatus getGrowingIOJS(int tenantId, IntegrationResponse resp) {
+	public IntegrationStatus getGrowingIOJS(int tenantId, IntegrationResp resp) {
 		IntegrationStatus status = IntegrationStatus.NOKNOW ;
 		if(tenantId != 0){
 			GrowingIoCompanyAction action = growingIoCompanyRepository.findByTenantId(Long.valueOf(tenantId));
@@ -126,12 +126,33 @@ public class GrowingService implements IGrowingService{
 		return status;
 	}
 
+	private void insertRegeditInfo(DelegateRegisterDataReq req,DelegateRegisterDataResp resp,int tenantId){
+		GrowingIoCompanyAction newaction  = new GrowingIoCompanyAction();
+		newaction.setAccountId(resp.getAccount_id());
+		newaction.setMail(req.getEmail());
+		newaction.setProjectId( resp.getProject_id());
+		newaction.setTenantId(tenantId);
+		newaction.setUserId(resp.getUser_id());
+		newaction.setCreateDateTime(new Date());
+		newaction.setRefreshToken(resp.getRefresh_token());
+		EntityManager em = emf.createEntityManager();
+        try {
+            em.getTransaction().begin();
+            em.persist(newaction);
+            em.getTransaction().commit();
+        } catch (Exception e) {
+            em.getTransaction().rollback();
+            log.error("Failed to create regedit for growingIO {}", newaction, e);
+            throw e ;
+        }	
+	}
+	
 	private IntegrationStatus delegateRegister(int tenantId){
 		IntegrationStatus status = IntegrationStatus.NOKNOW ; 
 		DelegateRegisterDataReq req = new DelegateRegisterDataReq();
 		
 	    List<AgentUser>	agentlist = agentUserRepository.findByTenantId(tenantId);
-	    if(agentlist.size() > 0){
+	    if(agentlist.isEmpty()){
 	    	req.setCompany(agentlist.get(0).getNicename());
 	    	
 	    	req.setEmail(agentlist.get(0).getUsername());
@@ -140,25 +161,7 @@ public class GrowingService implements IGrowingService{
 	    	try{
 	    		ResponseEntity<DelegateRegisterDataResp> remoteresp = growingIOServiceDecorator.delegateRegister(req,tenantId);
 		    	if(remoteresp!=null&&remoteresp.getStatusCode().equals(HttpStatus.OK)){
-		    		GrowingIoCompanyAction newaction  = new GrowingIoCompanyAction();
-		    		newaction.setAccountId(remoteresp.getBody().getAccount_id());
-		    		newaction.setMail(req.getEmail());
-		    		newaction.setProjectId( remoteresp.getBody().getProject_id());
-		    		newaction.setTenantId(tenantId);
-		    		newaction.setUserId(remoteresp.getBody().getUser_id());
-		    		newaction.setCreateDateTime(new Date());
-		    		newaction.setRefreshToken(remoteresp.getBody().getRefresh_token());
-		    		EntityManager em = emf.createEntityManager();
-		            try {
-		                em.getTransaction().begin();
-		                em.persist(newaction);
-		                em.getTransaction().commit();
-		            } catch (Exception e) {
-		                em.getTransaction().rollback();
-		                log.error("Failed to create regedit for growingIO {}", newaction, e);
-		                throw e ;
-
-		            }	
+		    		insertRegeditInfo(req,remoteresp.getBody(),tenantId);
 		    		status = IntegrationStatus.SUCCESS ;
 		    	}
 			}catch (FeignException e){
@@ -175,7 +178,7 @@ public class GrowingService implements IGrowingService{
 	}
 
 	@Override
-	public IntegrationStatus getGrowingDashBoard(int tenantId, IntegrationResponse resp) {
+	public IntegrationStatus getGrowingDashBoard(int tenantId, IntegrationResp resp) {
 		IntegrationStatus status = IntegrationStatus.NOKNOW ;
 		if(tenantId != 0){
 			GrowingIoCompanyAction action = growingIoCompanyRepository.findByTenantId(Long.valueOf(tenantId));
@@ -220,7 +223,7 @@ public class GrowingService implements IGrowingService{
 	}
 
 	@Override
-	public IntegrationStatus doGrowingIORegedit(int tenantId, IntegrationResponse resp) {
+	public IntegrationStatus doGrowingIORegedit(int tenantId, IntegrationResp resp) {
 		IntegrationStatus status = IntegrationStatus.NOKNOW ;
 		GrowingIoCompanyAction action = growingIoCompanyRepository.findByTenantId(Long.valueOf(tenantId));
 		if(action==null ){
@@ -235,7 +238,7 @@ public class GrowingService implements IGrowingService{
 
 	
 	@Override
-	public IntegrationStatus isGrowingIOUserInfo(int tenantId, IntegrationResponse resp) {
+	public IntegrationStatus isGrowingIOUserInfo(int tenantId, IntegrationResp resp) {
 		IntegrationStatus status = IntegrationStatus.NOKNOW ;
 		GrowingIoCompanyAction action = growingIoCompanyRepository.findByTenantId(Long.valueOf(tenantId));
 		if(action==null ){
@@ -350,7 +353,7 @@ public class GrowingService implements IGrowingService{
 
 	@Override
 	public IntegrationStatus getGrowingIOTracksUser(int tenantId, String servicesessionId,
-			IntegrationResponse resp) {
+			IntegrationResp resp) {
 		IntegrationStatus status = IntegrationStatus.NOKNOW ;
 		GrowingIoCompanyAction action = growingIoCompanyRepository.findByTenantId(Long.valueOf(tenantId));
 		if(action==null ){

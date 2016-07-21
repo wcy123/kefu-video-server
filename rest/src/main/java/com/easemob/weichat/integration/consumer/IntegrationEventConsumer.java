@@ -89,12 +89,12 @@ public class IntegrationEventConsumer implements EventConsumerCallback<BaseEvent
         if(StringUtils.isEmpty(version)){
             return false;
         }
-        double v = Double.valueOf(version);
+        double v = Double.parseDouble(version);
         return v >= 1.0;
     }
 
     private boolean isSupported(String type) {
-        return (type.equalsIgnoreCase(ServiceSessionCreatedEvent.class.getName()));
+        return type.equalsIgnoreCase(ServiceSessionCreatedEvent.class.getName());
     }
 	
 }

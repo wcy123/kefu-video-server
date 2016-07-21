@@ -1,8 +1,11 @@
 package com.easemob.weichat.integration.rest.mvc.growingio.remote;
 
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.URLEncoder;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -42,22 +45,13 @@ import lombok.extern.slf4j.Slf4j;
 public class GrowingIoServiceMgr  {
 
 	public GrowingIoServiceMgr(){
-		init();
-	}
-	
-	private void init(){
-		Method [] methods = IGrowingRemoteIframeRegeditService.class.getMethods();
-		for(Method method : methods){
-			GrowingIOServiceMethcd.put(method.getName(), method);
-		}
+		
 	}
 	
 	public static final String INTEGATION_TOPIC = "kf:integation:access:token:%d";
 
 	public static final String INTEGATION_OATH_FOMAT="Oauth client_id = %s,client_secret=%s";
-	
-	private  Map<String,Method> GrowingIOServiceMethcd = Maps.newHashMap();
-	
+		
 	@Value("${kefu.growingio.client_id}")
 	private  String client_id ; 
 	
@@ -126,10 +120,12 @@ public class GrowingIoServiceMgr  {
 	private ResponseEntity<InstallSdkResp> remoteGrowingInstallSdk(InstallSdkReq req,String baseurl,int tenantId,String url ,Map<String, String> map ,String projectId) {
 		ResponseEntity<InstallSdkResp> resp = null ;
 		int loop = 0;
-		while(loop <= repeated_num){
+		boolean sucesssign = false ;
+		String remoteurl = url ;
+		while(loop <= repeated_num&&!sucesssign){
 			try{
 				resp = growingRemoteIframeRegeditService.installSdk(map, String.format(INTEGATION_OATH_FOMAT, client_id,client_secret), projectId);
-			    break ;
+				sucesssign = true;
 			} catch (FeignException e) {
 				if(e.status() == 401){
 					if(loop == repeated_num -1){
@@ -137,13 +133,13 @@ public class GrowingIoServiceMgr  {
 						throw e ;
 					}else{
 						getAccessToken(tenantId, true);
-						url = getDashBoardInfo(req,baseurl,tenantId,map);
+						remoteurl = getDashBoardInfo(req,baseurl,tenantId,map);
 					}
 				} else if (e.status() == 301) {
 					InstallSdkResp data = new InstallSdkResp();
-					data.setUrl(url);
+					data.setUrl(remoteurl);
 					resp = new ResponseEntity<InstallSdkResp>(data,HttpStatus.OK );
-	                break;
+					sucesssign = true;
 				}else{
 					log.debug(e.getMessage(),e);
 					throw e;
@@ -156,8 +152,8 @@ public class GrowingIoServiceMgr  {
 		return resp ;
 	}
 	
-	public ResponseEntity<DashboardResp> dashboard(DashboardReq req, int tenantId) throws Exception{
-		String baseurl = String.format("/widgets/dashboard");
+	public ResponseEntity<DashboardResp> dashboard(DashboardReq req, int tenantId) {
+		String baseurl = "/widgets/dashboard";
 		Map<String, String> map = Maps.newTreeMap() ;
 		String url = getDashBoardInfo(req,baseurl,tenantId,map);
 		return remoteGrowingDashboard(url,baseurl,map,req, tenantId);
@@ -184,10 +180,12 @@ public class GrowingIoServiceMgr  {
 	private ResponseEntity<DashboardResp> remoteGrowingDashboard(String url ,String baseurl,Map<String, String> map,DashboardReq req, int tenantId) {
 		ResponseEntity<DashboardResp> resp = null ;
 		int loop = 0;
-		while(loop <= repeated_num){
+		boolean sucesssign = false ;
+		String remoteurl = url ;
+		while(loop <= repeated_num && !sucesssign){
 			try{
 				resp = growingRemoteIframeRegeditService.dashboard(map, String.format(INTEGATION_OATH_FOMAT, client_id,client_secret));
-			    break ;
+				sucesssign = true;
 			} catch (FeignException e) {
 				if(e.status() == 401){
 					if(loop == repeated_num -1){
@@ -195,14 +193,14 @@ public class GrowingIoServiceMgr  {
 						throw e ;
 					}else{
 						getAccessToken(tenantId, true);
-						url = getDashBoardInfo(req,baseurl,tenantId,map);
+						remoteurl = getDashBoardInfo(req,baseurl,tenantId,map);
 						
 					}
 				} else if (e.status() == 301) {
 					DashboardResp data = new DashboardResp();
-					data.setUrl(url);
+					data.setUrl(remoteurl);
 					resp = new ResponseEntity<DashboardResp>(data,HttpStatus.OK );
-	                break;
+					sucesssign = true;
 				}else{
 					log.debug(e.getMessage(),e);
 					throw e;
@@ -220,10 +218,12 @@ public class GrowingIoServiceMgr  {
 		ResponseEntity<String> resp = null ;
 		
 		int loop = 0;
-		while(loop <= repeated_num){
+		boolean sucesssign = false ;
+	
+		while(loop <= repeated_num&&!sucesssign){
 			try{
 				resp = growingRemoteEventService.event(getAccessToken(req.getTenantId(), false), req.getProject_id(), req.getUser_id());;
-			    break ;
+				sucesssign = true;
 			} catch (FeignException e) {
 				if(e.status() == 401){
 					if(loop == repeated_num -1){
@@ -395,7 +395,7 @@ public class GrowingIoServiceMgr  {
     }
     
      
-    public static class HMACSHA1 {  
+    private static class HMACSHA1 {  
     	  
         private static final String MAC_NAME = "HmacSHA1";    
         private static final String ENCODING = "UTF-8";  
@@ -405,9 +405,12 @@ public class GrowingIoServiceMgr  {
          * @param encryptText 被签名的字符串  
          * @param encryptKey  密钥  
          * @return  
+         * @throws UnsupportedEncodingException 
+         * @throws NoSuchAlgorithmException 
+         * @throws InvalidKeyException 
          * @throws Exception  
          */    
-        public static String HmacSHA1Encrypt(String encryptText, String encryptKey) throws Exception     
+        public static String HmacSHA1Encrypt(String encryptText, String encryptKey) throws UnsupportedEncodingException, NoSuchAlgorithmException, InvalidKeyException      
         {           
             byte[] data=encryptKey.getBytes(ENCODING);  
             SecretKey secretKey = new SecretKeySpec(data, MAC_NAME);   

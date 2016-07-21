@@ -92,8 +92,8 @@ public class GrowingIOServiceController extends AbstractController  {
 	public ResponseEntity<IntegrationResponse> getGrowingIOUserTrack(HttpServletRequest request,
             @PathVariable("tenantId") int tenantId,@PathVariable("servicesessionid") String servicesessionid) {
 		
-		//assertLogin();
-        //assertTenantAdminLogin(tenantId);
+		assertLogin();
+        assertTenantAdminLogin(tenantId);
         
         IntegrationResponse respdata = new  IntegrationResponse();
         IntegrationStatus status = growingService.getGrowingIOTracksUser(tenantId, servicesessionid, respdata);
@@ -115,14 +115,15 @@ public class GrowingIOServiceController extends AbstractController  {
         }
 	}
 	
-	 protected ResponseEntity<IntegrationResponse> createFailResponse(String errorDesc, HttpStatus httpStatus) {
+	private ResponseEntity<IntegrationResponse> createFailResponse(String errorDesc, HttpStatus httpStatus) {
 		 IntegrationResponse response = new IntegrationResponse();
 	        response.setStatus(IntegrationResponse.STATUS_FAIL);
 	        response.setErrorDescription(errorDesc);
 	        return new ResponseEntity<IntegrationResponse>(response, httpStatus);
 	    }
 
-	    protected ResponseEntity<IntegrationResponse> createSucResponse(Object entity, HttpStatus httpStatus) {
+	 
+	private ResponseEntity<IntegrationResponse> createSucResponse(Object entity, HttpStatus httpStatus) {
 	    	IntegrationResponse response = new IntegrationResponse();
 	        response.setStatus(IntegrationResponse.STATUS_OK);
 	        if(entity.getClass().equals(Page.class)){

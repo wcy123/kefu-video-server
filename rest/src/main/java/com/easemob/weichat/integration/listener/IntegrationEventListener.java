@@ -33,7 +33,7 @@ public class IntegrationEventListener {
         if (StringUtils.isNotBlank(serviceSession.getVisitorUser().getUserId()) && serviceSession.getTenantId() != null) {
         	ObjectNode ext = JSONUtil.getObjectMapper().convertValue(e.getEasemobMessage().getExt(), ObjectNode.class);
         	ObjectNode node = (ObjectNode)ext.get("weichat").get("visitor") ;
-        	node.put("gr_user_id", "a5e4aa34-d703-4375-b43d-577e70804f40");
+        	
         	if(node!=null&& node.get("gr_user_id")!=null){
         		publishToRedis(serviceSession.getServiceSessionId(),serviceSession.getTenantId(), serviceSession.getVisitorUser().getUserId(), node.get("gr_user_id").asText(),messagePusher);
         	}else{
