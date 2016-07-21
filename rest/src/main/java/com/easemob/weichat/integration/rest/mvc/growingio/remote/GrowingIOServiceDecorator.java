@@ -1,9 +1,12 @@
 package com.easemob.weichat.integration.rest.mvc.growingio.remote;
 
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URLEncoder;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -117,7 +120,7 @@ public class GrowingIOServiceDecorator  {
 	}
 	
 
-	public ResponseEntity<InstallSdkResp> installSdk(InstallSdkReq req, String projectId,int tenantId) throws Exception{
+	public ResponseEntity<InstallSdkResp> installSdk(InstallSdkReq req, String projectId,int tenantId) {
 		String baseurl = String.format("/widgets/projects/%s/install_sdk", projectId);
 		Map<String, String> map = Maps.newTreeMap() ;
 		
@@ -130,23 +133,25 @@ public class GrowingIOServiceDecorator  {
 	private ResponseEntity<InstallSdkResp> remoteGrowingInstallSdk(InstallSdkReq req,String baseurl,int tenantId,String url ,Map<String, String> map ,String projectId) {
 		ResponseEntity<InstallSdkResp> resp = null ;
 		int loop = 0;
-		while(loop <= repeated_num){
+		boolean sucesssign = false ;
+		String remoteurl = url ;
+		while(loop <= repeated_num&&!sucesssign){
 			try{
 				resp = growingRemoteIframeRegeditService.installSdk(map, String.format(INTEGATION_OATH_FOMAT, client_id,client_secret), projectId);
-			    break ;
+				sucesssign = true;
 			} catch (FeignException e) {
 				if(e.status() == 401){
 					if(loop == repeated_num -1){
 						log.debug(e.getMessage(),e);
 						throw e ;
 					}else{
-						url = getDashBoardInfo(req,baseurl,tenantId,map);
+						remoteurl = getDashBoardInfo(req,baseurl,tenantId,map);
 					}
 				} else if (e.status() == 301) {
 					InstallSdkResp data = new InstallSdkResp();
-					data.setUrl(url);
+					data.setUrl(remoteurl);
 					resp = new ResponseEntity<InstallSdkResp>(data,HttpStatus.OK );
-	                break;
+					sucesssign = true;
 				}else{
 					log.debug(e.getMessage(),e);
 					throw e;
@@ -159,8 +164,8 @@ public class GrowingIOServiceDecorator  {
 		return resp ;
 	}
 	
-	public ResponseEntity<DashboardResp> dashboard(DashboardReq req, int tenantId) throws Exception{
-		String baseurl = String.format("/widgets/dashboard");
+	public ResponseEntity<DashboardResp> dashboard(DashboardReq req, int tenantId){
+		String baseurl = "/widgets/dashboard";
 		Map<String, String> map = Maps.newTreeMap() ;
 		String url = getDashBoardInfo(req,baseurl,tenantId,map);
 		return remoteGrowingDashboard(url,baseurl,map,req, tenantId);
@@ -187,24 +192,26 @@ public class GrowingIOServiceDecorator  {
 	private ResponseEntity<DashboardResp> remoteGrowingDashboard(String url ,String baseurl,Map<String, String> map,DashboardReq req, int tenantId) {
 		ResponseEntity<DashboardResp> resp = null ;
 		int loop = 0;
-		while(loop <= repeated_num){
+	    String remoteurl = url ;
+	    boolean sucesssign = false ;
+		while(loop <= repeated_num && !sucesssign){
 			try{
 				resp = growingRemoteIframeRegeditService.dashboard(map, String.format(INTEGATION_OATH_FOMAT, client_id,client_secret));
-			    break ;
+				sucesssign = true ;
 			} catch (FeignException e) {
 				if(e.status() == 401){
 					if(loop == repeated_num -1){
 						log.debug(e.getMessage(),e);
 						throw e ;
 					}else{
-						url = getDashBoardInfo(req,baseurl,tenantId,map);
+						remoteurl = getDashBoardInfo(req,baseurl,tenantId,map);
 						
 					}
 				} else if (e.status() == 301) {
 					DashboardResp data = new DashboardResp();
-					data.setUrl(url);
+					data.setUrl(remoteurl);
 					resp = new ResponseEntity<DashboardResp>(data,HttpStatus.OK );
-	                break;
+					sucesssign = true;
 				}else{
 					log.debug(e.getMessage(),e);
 					throw e;
@@ -231,25 +238,32 @@ public class GrowingIOServiceDecorator  {
 	}
 	
 	
-	private String getSign(HttpMethod method,String base_uri , Object param,String accessToken) throws Exception {
-
-		Map<String, String> map = Maps.newTreeMap() ;
-		getValue(param,map);
-		String methodcode = URLEncoder.encode(method.name().toUpperCase(),"UTF-8")  ;
-		String baseurlcode=URLEncoder.encode(base_uri,"UTF-8")  ;
-		String paramval ="";
-		for (Map.Entry<String, String> entry : map.entrySet()) { 
-			if(Strings.isNullOrEmpty(paramval)){
-				paramval= entry.getKey() + "=" + entry.getValue();
-			}else{
-				paramval = paramval + "&" + entry.getKey() + "=" + entry.getValue();
+	private String getSign(HttpMethod method,String base_uri , Object param,String accessToken)  {
+		String sign = "";
+		try{
+			Map<String, String> map = Maps.newTreeMap() ;
+			getValue(param,map);
+			String methodcode = URLEncoder.encode(method.name().toUpperCase(),"UTF-8")  ;
+			String baseurlcode=URLEncoder.encode(base_uri,"UTF-8")  ;
+			String paramval ="";
+			for (Map.Entry<String, String> entry : map.entrySet()) { 
+				if(Strings.isNullOrEmpty(paramval)){
+					paramval= entry.getKey() + "=" + entry.getValue();
+				}else{
+					paramval = paramval + "&" + entry.getKey() + "=" + entry.getValue();
+				}
 			}
+			
+			String paramvalcode = URLEncoder.encode(paramval,"UTF-8")  ;
+			String signstr= String.format("%s&%s&%s", methodcode,baseurlcode,paramvalcode);
+			
+			sign = HMACSHA1.HmacSHA1Encrypt(signstr, accessToken) ; 
+		}catch(Exception e){
+			log.debug(e.getMessage(),e);
 		}
 		
-		String paramvalcode = URLEncoder.encode(paramval,"UTF-8")  ;
-		String signstr= String.format("%s&%s&%s", methodcode,baseurlcode,paramvalcode);
 		
-		return HMACSHA1.HmacSHA1Encrypt(signstr, accessToken)   ;
+		return sign ;   
 	}
 	
 	private String getAccessToken(int tenantId, boolean isInit) {
@@ -381,22 +395,26 @@ public class GrowingIOServiceDecorator  {
     }
     
      
-    public static class HMACSHA1 {  
+    private static class HMACSHA1 {  
     	  
+        private HMACSHA1(){
+        	
+        }
+        
         private static final String MAC_NAME = "HmacSHA1";    
         private static final String ENCODING = "UTF-8";  
         
-        private final static char[] mChars = "0123456789ABCDEF".toCharArray();  
-
-  
         /**  
          * 使用 HMAC-SHA1 签名方法对对encryptText进行签名  
          * @param encryptText 被签名的字符串  
          * @param encryptKey  密钥  
          * @return  
+         * @throws UnsupportedEncodingException 
+         * @throws NoSuchAlgorithmException 
+         * @throws InvalidKeyException 
          * @throws Exception  
          */    
-        public static String HmacSHA1Encrypt(String encryptText, String encryptKey) throws Exception     
+        public static String HmacSHA1Encrypt(String encryptText, String encryptKey) throws UnsupportedEncodingException, NoSuchAlgorithmException, InvalidKeyException     
         {           
             byte[] data=encryptKey.getBytes(ENCODING);  
             SecretKey secretKey = new SecretKeySpec(data, MAC_NAME);   
@@ -406,33 +424,7 @@ public class GrowingIOServiceDecorator  {
             byte[] digest = mac.doFinal(text);  
             return new HexBinaryAdapter().marshal(digest); 
         }    
-        
-        /**  
-         * 字符串转换成十六进制字符串 
-         * @param str String 待转换的ASCII字符串 
-         * @return String 每个Byte之间空格分隔，如: [61 6C 6B] 
-         */    
-        public static String str2HexStr(String str){    
-            StringBuilder sb = new StringBuilder();  
-            byte[] bs = str.getBytes();    
-              
-            for (int i = 0; i < bs.length; i++){    
-                sb.append(mChars[(bs[i] & 0xFF) >> 4]);    
-                sb.append(mChars[bs[i] & 0x0F]);  
-                sb.append(' ');  
-            }    
-            return sb.toString().trim();    
-        }  
-        
-        public static String str2HexStr(byte[] bs){    
-            StringBuilder sb = new StringBuilder();  
-            for (int i = 0; i < bs.length; i++){    
-                sb.append(mChars[(bs[i] & 0xFF) >> 4]);    
-                sb.append(mChars[bs[i] & 0x0F]);  
-                sb.append(' ');  
-            }    
-            return sb.toString().trim();    
-        }  
+      
     }  
     
   

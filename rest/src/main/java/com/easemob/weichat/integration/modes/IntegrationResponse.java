@@ -17,19 +17,7 @@ public class IntegrationResponse {
       * 标明请求是否成功
       */
      private String status;
-     /**
-      * @deprecated
-      */
-     private Integer count;
-     /**
-      * @deprecated
-      */
-     private Integer totalCount;
-     /**
-      * @deprecated
-      */
-     private List<?> data;
-
+    
      /**
       * TODO 错误编码,需要讨论
       */
@@ -76,10 +64,5 @@ public class IntegrationResponse {
       */
      private Long totalElements;
 
-     public void setData(List<?> data) {
-         if(data!=null){
-                 this.count = data.size();
-                 this.data = data;
-         }
-         }
+     
 }

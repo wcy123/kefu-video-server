@@ -40,18 +40,7 @@ public class AgentUserAction extends User {
 	private String username;
 	@Column(updatable = false)
 	private String roles;	//可以同时拥有多种，用逗号分隔
-    @Temporal(TemporalType.TIMESTAMP)
-    @CreationTimestamp
-    @Column(updatable=false)
-    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss",timezone = "GMT+8")
-    private Date createDateTime;
-    @Temporal(TemporalType.TIMESTAMP)
-    @UpdateTimestamp
-    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss",timezone = "GMT+8")
-    private Date lastUpdateDateTime;
-    @JsonIgnore
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date lastActiveDateTime; //用户最后心跳活动时间，当用户向系统发送尝试调度时，系统认为该用户活跃，会更新该时间
+   
     @Enumerated(EnumType.STRING)
 	private UserStatus status = UserStatus.Enable;
     @Enumerated(EnumType.STRING)
