@@ -9,7 +9,7 @@ import lombok.Data;
 
 @Data
 @JsonInclude(value=Include.NON_NULL)
-public class IntegrationResponse {
+public class IntegrationResp {
 	 public static final String STATUS_OK = "OK";
      public static final String STATUS_FAIL = "FAIL";
      

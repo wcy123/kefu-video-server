@@ -1,4 +1,4 @@
-package com.easemob.weichat.integration.rest.mvc.growingio.jpa;
+package com.easemob.weichat.integration.rest.mvc.growingio.jpa.entity;
 
 import java.util.Date;
 
@@ -30,7 +30,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "growing_io_company")
-public class GrowingTenantAction {
+public class GrowingIoCompanyAction {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -38,7 +38,7 @@ public class GrowingTenantAction {
 	private Long id;
 	
 	@Column(name = "tenantId")
-	private Long tenantId;
+	private int tenantId;
 	
 	@Column(name = "userId")
 	private String userId;
@@ -60,8 +60,4 @@ public class GrowingTenantAction {
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
 	@Column(name = "createDateTime")
 	private Date createDateTime;
-	
-	@Enumerated(EnumType.STRING)
-    @Column(name = "status", length = 100)
-    private GrowingTenantType status; 
 }

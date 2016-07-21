@@ -8,6 +8,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.easemob.weichat.integration.rest.mvc.growingio.jpa.entity.GrowingIoCompanyAction;
+
 	
 
 /**
@@ -15,10 +17,10 @@ import org.springframework.transaction.annotation.Transactional;
  * @date 2016年7月4日
  */
 @Repository
-public interface GrowingTenantRepository extends JpaRepository<GrowingTenantAction, Long> {
+public interface GrowingIoCompanyRepository extends JpaRepository<GrowingIoCompanyAction, Long> {
 
 	@Query(value = "SELECT o FROM GrowingTenantAction o WHERE o.tenantId = ?1")
-	public GrowingTenantAction findByTenantId(Long tenantId);
+	public GrowingIoCompanyAction findByTenantId(Long tenantId);
 
 	@Transactional
     @Modifying

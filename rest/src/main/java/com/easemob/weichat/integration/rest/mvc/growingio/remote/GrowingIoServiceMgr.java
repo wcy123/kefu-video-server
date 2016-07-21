@@ -2,7 +2,6 @@ package com.easemob.weichat.integration.rest.mvc.growingio.remote;
 
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URLEncoder;
 import java.security.InvalidKeyException;
@@ -33,8 +32,6 @@ import com.easemob.weichat.integration.modes.InstallSdkReq;
 import com.easemob.weichat.integration.modes.InstallSdkResp;
 import com.easemob.weichat.integration.modes.UpdateRegisterDataReq;
 import com.easemob.weichat.integration.modes.UpdateRegisterDataResp;
-import com.easemob.weichat.integration.rest.mvc.growingio.jpa.GrowingTenantAction;
-import com.easemob.weichat.integration.rest.mvc.growingio.jpa.GrowingTenantRepository;
 import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
 
@@ -43,24 +40,16 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component
-public class GrowingIOServiceDecorator  {
+public class GrowingIoServiceMgr  {
 
-	public GrowingIOServiceDecorator(){
-		init();
-	}
-	
-	private void init(){
-		Method [] methods = IGrowingRemoteIframeRegeditService.class.getMethods();
-		for(Method method : methods){
-			GrowingIOServiceMethcd.put(method.getName(), method);
-		}
+	public GrowingIoServiceMgr(){
+		
 	}
 	
 	public static final String INTEGATION_TOPIC = "kf:integation:access:token:%d";
 
 	public static final String INTEGATION_OATH_FOMAT="Oauth client_id = %s,client_secret=%s";
 	
-	private  Map<String,Method> GrowingIOServiceMethcd = Maps.newHashMap();
 	
 	@Value("${kefu.growingio.client_id}")
 	private  String client_id ; 
@@ -86,10 +75,6 @@ public class GrowingIOServiceDecorator  {
 	@Autowired
 	private StringRedisTemplate stringRedisTemplate;
 	
-	@Autowired
-	private GrowingTenantRepository growingTenantRepository ;
-		
-	
 	
 	/**
 	 * 清除Redis保存的accesstoken
@@ -97,7 +82,7 @@ public class GrowingIOServiceDecorator  {
 	 * @author likai
 	 *
 	 */
-	private void clearGrowingEnvironment(int tetenantId){
+	private void clearGrowingToken(int tetenantId){
 		String token = String.format(INTEGATION_TOPIC,tetenantId);
 		stringRedisTemplate.delete(token);
 	}
@@ -108,13 +93,13 @@ public class GrowingIOServiceDecorator  {
 	 * @author likai
 	 *
 	 */
-	private void setGrowingAccessToken(int tetenantId ,String accessToken,long expire){
-		String key = String.format(INTEGATION_TOPIC, tetenantId);
-		stringRedisTemplate.boundValueOps(key).setIfAbsent(accessToken);
+	private void setGrowingToken(int tenantId ,String accessToken,long expire){
+		String tokenkey = String.format(INTEGATION_TOPIC, tenantId);
+		stringRedisTemplate.boundValueOps(tokenkey).setIfAbsent(accessToken);
 		if(expire ==-1){
-			stringRedisTemplate.boundValueOps(key).expire(7200, TimeUnit.SECONDS);
+			stringRedisTemplate.boundValueOps(tokenkey).expire(7200, TimeUnit.SECONDS);
 		}else{
-			stringRedisTemplate.boundValueOps(key).expire(expire, TimeUnit.SECONDS);
+			stringRedisTemplate.boundValueOps(tokenkey).expire(expire, TimeUnit.SECONDS);
 		}
 		
 	}
@@ -127,10 +112,10 @@ public class GrowingIOServiceDecorator  {
 	 *
 	 */
 	public ResponseEntity<DelegateRegisterDataResp> delegateRegister(DelegateRegisterDataReq req, int tenantId ){
-		clearGrowingEnvironment( tenantId); 
+		clearGrowingToken( tenantId); 
 		ResponseEntity<DelegateRegisterDataResp> resp = growingRemoteService.delegateRegister(req, String.format(INTEGATION_OATH_FOMAT, client_id,client_secret));
 		if(resp.getStatusCode() == HttpStatus.OK){
-			setGrowingAccessToken(tenantId, resp.getBody().getAccessToken(),resp.getBody().getExpiresIn());
+			setGrowingToken(tenantId, resp.getBody().getAccessToken(),resp.getBody().getExpiresIn());
 		}
 		return resp;
 	}
@@ -354,13 +339,7 @@ public class GrowingIOServiceDecorator  {
 	}
 	
 	private String getrefAccessTokenForTeanan(int tenantId){
-		GrowingTenantAction action = growingTenantRepository.findByTenantId(Long.valueOf(tenantId));
-		
-		if(action!=null){
-			return action.getRefreshToken();
-		}else{
-			return null;
-		}
+		return null;
 	}
 	
 	
@@ -383,8 +362,8 @@ public class GrowingIOServiceDecorator  {
     		ResponseEntity<UpdateRegisterDataResp> resp =growingRemoteService.updateRegister(req, String.format(INTEGATION_OATH_FOMAT, client_id,client_secret));
     		if(resp.getStatusCode().equals(HttpStatus.OK)){
     			accessToken = resp.getBody().getAccessToken();
-    			growingTenantRepository.updateGrowingRefreshTokenByTenanId(resp.getBody().getRefreshToken(), Long.valueOf(tenantId));
-    			setGrowingAccessToken(tenantId, resp.getBody().getAccessToken(),-1);
+
+    			setGrowingToken(tenantId, resp.getBody().getAccessToken(),-1);
     		}else{
     			log.debug("processAccessToken :[%d],[%s]",tenantId,resp.getStatusCode().toString());
     		}
