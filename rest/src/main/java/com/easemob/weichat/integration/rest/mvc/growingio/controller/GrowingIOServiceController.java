@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.easemob.weichat.integration.constants.IntegrationStatus;
-import com.easemob.weichat.integration.modes.IntegrationResponse;
+import com.easemob.weichat.integration.modes.IntegrationResp;
 import com.easemob.weichat.integration.rest.mvc.growingio.service.IGrowingService;
 import com.easemob.weichat.models.data.ApiResponse;
 import com.easemob.weichat.rest.mvc.AbstractController;
@@ -31,13 +31,13 @@ public class GrowingIOServiceController extends AbstractController  {
     private IGrowingService growingService ;
 	
 	@RequestMapping(value="/v1/integration/tenants/{tenantId}/js", method = RequestMethod.GET)
-	public ResponseEntity<IntegrationResponse> getGrowingJS(HttpServletRequest request,
+	public ResponseEntity<IntegrationResp> getGrowingJS(HttpServletRequest request,
             @PathVariable("tenantId") int tenantId) {
 		
 		assertLogin();
         assertTenantAdminLogin(tenantId);
         
-        IntegrationResponse respdata = new  IntegrationResponse();
+        IntegrationResp respdata = new  IntegrationResp();
         IntegrationStatus status = growingService.getGrowingIOJS(tenantId, respdata);
         
         return getReturnValue(status,respdata);
@@ -46,13 +46,13 @@ public class GrowingIOServiceController extends AbstractController  {
 	
 	
 	@RequestMapping(value="/v1/integration/tenants/{tenantId}/dashboard", method = RequestMethod.GET)
-	public ResponseEntity<IntegrationResponse> getDashboard(HttpServletRequest request,
+	public ResponseEntity<IntegrationResp> getDashboard(HttpServletRequest request,
             @PathVariable("tenantId") int tenantId) {
 		
 		assertLogin();
         assertTenantAdminLogin(tenantId);
         
-        IntegrationResponse respdata = new  IntegrationResponse();
+        IntegrationResp respdata = new  IntegrationResp();
         IntegrationStatus status = growingService.getGrowingDashBoard(tenantId, respdata);
         
         return getReturnValue(status,respdata);
@@ -60,13 +60,13 @@ public class GrowingIOServiceController extends AbstractController  {
 	}
 	
 	@RequestMapping(value="/v1/integration/tenants/{tenantId}/regedit", method = RequestMethod.GET)
-	public ResponseEntity<IntegrationResponse> doRegedit(HttpServletRequest request,
+	public ResponseEntity<IntegrationResp> doRegedit(HttpServletRequest request,
             @PathVariable("tenantId") int tenantId) {
 		
 		assertLogin();
         assertTenantAdminLogin(tenantId);
         
-        IntegrationResponse respdata = new  IntegrationResponse();
+        IntegrationResp respdata = new  IntegrationResp();
         IntegrationStatus status = growingService.doGrowingIORegedit(tenantId, respdata);
         
         return getReturnValue(status,respdata);
@@ -75,13 +75,13 @@ public class GrowingIOServiceController extends AbstractController  {
 	
 	
 	@RequestMapping(value="/v1/integration/tenants/{tenantId}/userinfo", method = RequestMethod.GET)
-	public ResponseEntity<IntegrationResponse> isGrowingIOUserInfo(HttpServletRequest request,
+	public ResponseEntity<IntegrationResp> isGrowingIOUserInfo(HttpServletRequest request,
             @PathVariable("tenantId") int tenantId) {
 		
 		assertLogin();
         assertTenantAdminLogin(tenantId);
         
-        IntegrationResponse respdata = new  IntegrationResponse();
+        IntegrationResp respdata = new  IntegrationResp();
         IntegrationStatus status = growingService.isGrowingIOUserInfo(tenantId, respdata);
         
         return getReturnValue(status,respdata);
@@ -89,13 +89,13 @@ public class GrowingIOServiceController extends AbstractController  {
 	}
 	
 	@RequestMapping(value="/v1/integration/tenants/{tenantId}/servicesessionid/{servicesessionid}/tracks", method = RequestMethod.GET)
-	public ResponseEntity<IntegrationResponse> getGrowingIOUserTrack(HttpServletRequest request,
+	public ResponseEntity<IntegrationResp> getGrowingIOUserTrack(HttpServletRequest request,
             @PathVariable("tenantId") int tenantId,@PathVariable("servicesessionid") String servicesessionid) {
 		
 		assertLogin();
         assertTenantAdminLogin(tenantId);
         
-        IntegrationResponse respdata = new  IntegrationResponse();
+        IntegrationResp respdata = new  IntegrationResp();
         IntegrationStatus status = growingService.getGrowingIOTracksUser(tenantId, servicesessionid, respdata);
         
         return getReturnValue(status,respdata);
@@ -103,7 +103,7 @@ public class GrowingIOServiceController extends AbstractController  {
 	}
 	
 	
-	private ResponseEntity<IntegrationResponse> getReturnValue(IntegrationStatus status,IntegrationResponse respdata ){
+	private ResponseEntity<IntegrationResp> getReturnValue(IntegrationStatus status,IntegrationResp respdata ){
 		if(status.equals(IntegrationStatus.SUCCESS)){
         	return createSucResponse(respdata,HttpStatus.OK);
         }else{
@@ -115,24 +115,24 @@ public class GrowingIOServiceController extends AbstractController  {
         }
 	}
 	
-	private ResponseEntity<IntegrationResponse> createFailResponse(String errorDesc, HttpStatus httpStatus) {
-		 IntegrationResponse response = new IntegrationResponse();
-	        response.setStatus(IntegrationResponse.STATUS_FAIL);
+	private ResponseEntity<IntegrationResp> createFailResponse(String errorDesc, HttpStatus httpStatus) {
+		IntegrationResp response = new IntegrationResp();
+	        response.setStatus(IntegrationResp.STATUS_FAIL);
 	        response.setErrorDescription(errorDesc);
-	        return new ResponseEntity<IntegrationResponse>(response, httpStatus);
+	        return new ResponseEntity<IntegrationResp>(response, httpStatus);
 	    }
 
 	 
-	private ResponseEntity<IntegrationResponse> createSucResponse(Object entity, HttpStatus httpStatus) {
-	    	IntegrationResponse response = new IntegrationResponse();
-	        response.setStatus(IntegrationResponse.STATUS_OK);
+	    protected ResponseEntity<IntegrationResp> createSucResponse(Object entity, HttpStatus httpStatus) {
+	    	IntegrationResp response = new IntegrationResp();
+	        response.setStatus(IntegrationResp.STATUS_OK);
 	        if(entity.getClass().equals(Page.class)){
 	        	response.setEntity(createResponseEntity(entity));
 	        }else{
 	        	response.setEntity(entity);
 	        }
 	        
-	        return new ResponseEntity<IntegrationResponse>(response, httpStatus);
+	        return new ResponseEntity<IntegrationResp>(response, httpStatus);
 	    }
 
 	    protected ResponseEntity<ApiResponse> createResponseEntity(Page<?> page) {
