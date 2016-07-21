@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import com.easemob.weichat.integration.modes.DashboardResp;
 import com.easemob.weichat.integration.modes.InstallSdkResp;
 
-       
+
 /**
  * growingio的初始化类接口
  * 

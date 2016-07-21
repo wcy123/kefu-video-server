@@ -4,9 +4,11 @@ import lombok.Data;
 
 @Data
 public class UpdateRegisterDataReq {
-	private String clientId ;
-	private String clientSecret ; 
+
+	private String client_id ;
+	private String client_secret ; 
 	private long timestamp ;
-	private String grantType ;
-	private String refreshToken ;
+	private String grant_type ;
+	private String refresh_token ;
+
 }

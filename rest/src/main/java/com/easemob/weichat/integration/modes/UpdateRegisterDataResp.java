@@ -4,6 +4,8 @@ import lombok.Data;
 
 @Data
 public class UpdateRegisterDataResp {
-	private String refreshToken ;
-	private String accessToken ;  
+
+	private String refresh_token ;
+	private String access_token ;  
+
 }

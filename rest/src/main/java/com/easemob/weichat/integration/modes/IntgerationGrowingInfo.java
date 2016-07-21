@@ -8,4 +8,5 @@ public class IntgerationGrowingInfo {
 	private int tenantId;
 	private String growingioId;
 	private String userId;
+	private String serviceSessionId ;
 }

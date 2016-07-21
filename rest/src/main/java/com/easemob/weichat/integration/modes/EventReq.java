@@ -4,6 +4,9 @@ import lombok.Data;
 
 @Data
 public class EventReq { 
-	private String userId ;
-	private String projectId ; 
+
+	private String user_id ;
+	private String project_id ; 
+	private int tenantId; 
+
 }

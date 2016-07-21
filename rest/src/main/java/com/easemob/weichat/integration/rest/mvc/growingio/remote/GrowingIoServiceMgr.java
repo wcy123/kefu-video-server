@@ -1,11 +1,8 @@
 package com.easemob.weichat.integration.rest.mvc.growingio.remote;
 
-import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.URLEncoder;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -32,6 +29,8 @@ import com.easemob.weichat.integration.modes.InstallSdkReq;
 import com.easemob.weichat.integration.modes.InstallSdkResp;
 import com.easemob.weichat.integration.modes.UpdateRegisterDataReq;
 import com.easemob.weichat.integration.modes.UpdateRegisterDataResp;
+import com.easemob.weichat.integration.rest.mvc.growingio.jpa.GrowingIoCompanyRepository;
+import com.easemob.weichat.integration.rest.mvc.growingio.jpa.entity.GrowingIoCompanyAction;
 import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
 
@@ -43,13 +42,21 @@ import lombok.extern.slf4j.Slf4j;
 public class GrowingIoServiceMgr  {
 
 	public GrowingIoServiceMgr(){
-		
+		init();
+	}
+	
+	private void init(){
+		Method [] methods = IGrowingRemoteIframeRegeditService.class.getMethods();
+		for(Method method : methods){
+			GrowingIOServiceMethcd.put(method.getName(), method);
+		}
 	}
 	
 	public static final String INTEGATION_TOPIC = "kf:integation:access:token:%d";
 
 	public static final String INTEGATION_OATH_FOMAT="Oauth client_id = %s,client_secret=%s";
 	
+	private  Map<String,Method> GrowingIOServiceMethcd = Maps.newHashMap();
 	
 	@Value("${kefu.growingio.client_id}")
 	private  String client_id ; 
@@ -70,63 +77,43 @@ public class GrowingIoServiceMgr  {
 
 	@Autowired
 	private IGrowingRemoteEventService growingRemoteEventService ;
-
 	
 	@Autowired
 	private StringRedisTemplate stringRedisTemplate;
 	
-	
-	/**
-	 * 清除Redis保存的accesstoken
-	 * 
-	 * @author likai
-	 *
-	 */
-	private void clearGrowingToken(int tetenantId){
-		String token = String.format(INTEGATION_TOPIC,tetenantId);
+	@Autowired
+	private GrowingIoCompanyRepository growingIoCompanyRepository ;
+		
+	private void clearGrowingAccessToken(int tenantId){
+		String token = String.format(INTEGATION_TOPIC,tenantId);
 		stringRedisTemplate.delete(token);
 	}
 
-	/**
-	 * 设置Redis保存的accesstoken
-	 * 
-	 * @author likai
-	 *
-	 */
-	private void setGrowingToken(int tenantId ,String accessToken,long expire){
-		String tokenkey = String.format(INTEGATION_TOPIC, tenantId);
-		stringRedisTemplate.boundValueOps(tokenkey).setIfAbsent(accessToken);
-		if(expire ==-1){
-			stringRedisTemplate.boundValueOps(tokenkey).expire(7200, TimeUnit.SECONDS);
-		}else{
-			stringRedisTemplate.boundValueOps(tokenkey).expire(expire, TimeUnit.SECONDS);
+	private void setGrowingAccessToken(int tenantId ,String accessToken,long expire){
+		String key = String.format(INTEGATION_TOPIC, tenantId);
+		stringRedisTemplate.boundValueOps(key).setIfAbsent(accessToken);
+		if(expire !=-1){
+			stringRedisTemplate.boundValueOps(key).expire(expire, TimeUnit.SECONDS);
 		}
 		
 	}
-	
-	
-	/**
-	 * growingio 注册接口
-	 * 
-	 * @author likai
-	 *
-	 */
+
 	public ResponseEntity<DelegateRegisterDataResp> delegateRegister(DelegateRegisterDataReq req, int tenantId ){
-		clearGrowingToken( tenantId); 
+		clearGrowingAccessToken( tenantId); 
 		ResponseEntity<DelegateRegisterDataResp> resp = growingRemoteService.delegateRegister(req, String.format(INTEGATION_OATH_FOMAT, client_id,client_secret));
 		if(resp.getStatusCode() == HttpStatus.OK){
-			setGrowingToken(tenantId, resp.getBody().getAccessToken(),resp.getBody().getExpiresIn());
+			setGrowingAccessToken(tenantId, resp.getBody().getAccess_token(),resp.getBody().getExpires_in());
 		}
 		return resp;
 	}
 	
-	/**
-	 * growingio installSDK接口
-	 * 
-	 * @author likai
-	 *
-	 */
-	public ResponseEntity<InstallSdkResp> installSdk(InstallSdkReq req, String projectId,int tenantId) {
+	public String  analyzeFeignException(FeignException e){
+		int index = e.getMessage().indexOf("content:") + "content:".length();
+		return e.getMessage().substring(index);
+	}
+	
+
+	public ResponseEntity<InstallSdkResp> installSdk(InstallSdkReq req, String projectId,int tenantId) throws Exception{
 		String baseurl = String.format("/widgets/projects/%s/install_sdk", projectId);
 		Map<String, String> map = Maps.newTreeMap() ;
 		
@@ -136,41 +123,27 @@ public class GrowingIoServiceMgr  {
 		return remoteGrowingInstallSdk(req,baseurl,tenantId,url,map,projectId);
 	}
 	
-	public String  analyzeFeignException(FeignException e){
-		int index = e.getMessage().indexOf("content:") + "content:".length();
-		return e.getMessage().substring(index);
-	}
-	
-
-	
-	/**
-	 * 调用growingid的installSDK接口
-	 * 
-	 * @author likai
-	 *
-	 */
 	private ResponseEntity<InstallSdkResp> remoteGrowingInstallSdk(InstallSdkReq req,String baseurl,int tenantId,String url ,Map<String, String> map ,String projectId) {
 		ResponseEntity<InstallSdkResp> resp = null ;
 		int loop = 0;
-		boolean sucesssign = false ;
-		String remoteurl = url ;
-		while(loop <= repeated_num&&!sucesssign){
+		while(loop <= repeated_num){
 			try{
 				resp = growingRemoteIframeRegeditService.installSdk(map, String.format(INTEGATION_OATH_FOMAT, client_id,client_secret), projectId);
-				sucesssign = true;
+			    break ;
 			} catch (FeignException e) {
 				if(e.status() == 401){
 					if(loop == repeated_num -1){
 						log.debug(e.getMessage(),e);
 						throw e ;
 					}else{
-						remoteurl = getDashBoardInfo(req,baseurl,tenantId,map);
+						getAccessToken(tenantId, true);
+						url = getDashBoardInfo(req,baseurl,tenantId,map);
 					}
 				} else if (e.status() == 301) {
 					InstallSdkResp data = new InstallSdkResp();
-					data.setUrl(remoteurl);
+					data.setUrl(url);
 					resp = new ResponseEntity<InstallSdkResp>(data,HttpStatus.OK );
-					sucesssign = true;
+	                break;
 				}else{
 					log.debug(e.getMessage(),e);
 					throw e;
@@ -183,26 +156,13 @@ public class GrowingIoServiceMgr  {
 		return resp ;
 	}
 	
-	
-	/**
-	 * 提供growingio的Dashboard
-	 * 
-	 * @author likai
-	 *
-	 */
-	public ResponseEntity<DashboardResp> dashboard(DashboardReq req, int tenantId){
-		String baseurl = "/widgets/dashboard";
+	public ResponseEntity<DashboardResp> dashboard(DashboardReq req, int tenantId) throws Exception{
+		String baseurl = String.format("/widgets/dashboard");
 		Map<String, String> map = Maps.newTreeMap() ;
 		String url = getDashBoardInfo(req,baseurl,tenantId,map);
 		return remoteGrowingDashboard(url,baseurl,map,req, tenantId);
 	}
 	
-	/**
-	 * 得到dashboard的签名url
-	 * 
-	 * @author likai
-	 *
-	 */
 	private String getDashBoardInfo(Object req, String baseurl,int tenantId,Map<String, String> map) {
 		String url = "";
 		try{
@@ -221,35 +181,28 @@ public class GrowingIoServiceMgr  {
 		return url ; 
 	}
 	
-	/**
-	 * growingio接口dashboard
-	 * 
-	 * @author likai
-	 *
-	 */
 	private ResponseEntity<DashboardResp> remoteGrowingDashboard(String url ,String baseurl,Map<String, String> map,DashboardReq req, int tenantId) {
 		ResponseEntity<DashboardResp> resp = null ;
 		int loop = 0;
-	    String remoteurl = url ;
-	    boolean sucesssign = false ;
-		while(loop <= repeated_num && !sucesssign){
+		while(loop <= repeated_num){
 			try{
 				resp = growingRemoteIframeRegeditService.dashboard(map, String.format(INTEGATION_OATH_FOMAT, client_id,client_secret));
-				sucesssign = true ;
+			    break ;
 			} catch (FeignException e) {
 				if(e.status() == 401){
 					if(loop == repeated_num -1){
 						log.debug(e.getMessage(),e);
 						throw e ;
 					}else{
-						remoteurl = getDashBoardInfo(req,baseurl,tenantId,map);
+						getAccessToken(tenantId, true);
+						url = getDashBoardInfo(req,baseurl,tenantId,map);
 						
 					}
 				} else if (e.status() == 301) {
 					DashboardResp data = new DashboardResp();
-					data.setUrl(remoteurl);
+					data.setUrl(url);
 					resp = new ResponseEntity<DashboardResp>(data,HttpStatus.OK );
-					sucesssign = true;
+	                break;
 				}else{
 					log.debug(e.getMessage(),e);
 					throw e;
@@ -263,65 +216,56 @@ public class GrowingIoServiceMgr  {
 	}
 	
 	
-	/**
-	 * 返回会话轨迹的json
-	 * 
-	 * @author likai
-	 *
-	 */
 	public ResponseEntity<String> event(EventReq req){
 		ResponseEntity<String> resp = null ;
-		try{
-			resp = growingRemoteEventService.event(String.format(INTEGATION_OATH_FOMAT, client_id,client_secret), req.getProjectId(), req.getUserId());;
-		} catch (FeignException e) {
-			log.debug(e.getMessage(),e);
-			throw e;
+		
+		int loop = 0;
+		while(loop <= repeated_num){
+			try{
+				resp = growingRemoteEventService.event(getAccessToken(req.getTenantId(), false), req.getProject_id(), req.getUser_id());;
+			    break ;
+			} catch (FeignException e) {
+				if(e.status() == 401){
+					if(loop == repeated_num -1){
+						log.debug(e.getMessage(),e);
+						throw e ;
+					}else{
+						getAccessToken(req.getTenantId(), true);
+					}
+				} else{
+					log.debug(e.getMessage(),e);
+					throw e;
+				}
+			}
+			
+			loop ++;
 		}
 		
 		return resp ; 
 	}
 	
 	
-	/**
-	 * 生成Outh2.0的签名
-	 * 
-	 * @author likai
-	 *
-	 */
-	private String getSign(HttpMethod method,String base_uri , Object param,String accessToken)  {
-		String sign = "";
-		try{
-			Map<String, String> map = Maps.newTreeMap() ;
-			getValue(param,map);
-			String methodcode = URLEncoder.encode(method.name().toUpperCase(),"UTF-8")  ;
-			String baseurlcode=URLEncoder.encode(base_uri,"UTF-8")  ;
-			String paramval ="";
-			for (Map.Entry<String, String> entry : map.entrySet()) { 
-				if(Strings.isNullOrEmpty(paramval)){
-					paramval= entry.getKey() + "=" + entry.getValue();
-				}else{
-					paramval = paramval + "&" + entry.getKey() + "=" + entry.getValue();
-				}
+	private String getSign(HttpMethod method,String base_uri , Object param,String accessToken) throws Exception {
+
+		Map<String, String> map = Maps.newTreeMap() ;
+		getValue(param,map);
+		String methodcode = URLEncoder.encode(method.name().toUpperCase(),"UTF-8")  ;
+		String baseurlcode=URLEncoder.encode(base_uri,"UTF-8")  ;
+		String paramval ="";
+		for (Map.Entry<String, String> entry : map.entrySet()) { 
+			if(Strings.isNullOrEmpty(paramval)){
+				paramval= entry.getKey() + "=" + entry.getValue();
+			}else{
+				paramval = paramval + "&" + entry.getKey() + "=" + entry.getValue();
 			}
-			
-			String paramvalcode = URLEncoder.encode(paramval,"UTF-8")  ;
-			String signstr= String.format("%s&%s&%s", methodcode,baseurlcode,paramvalcode);
-			
-			sign = HMACSHA1.HmacSHA1Encrypt(signstr, accessToken) ; 
-		}catch(Exception e){
-			log.debug(e.getMessage(),e);
 		}
 		
+		String paramvalcode = URLEncoder.encode(paramval,"UTF-8")  ;
+		String signstr= String.format("%s&%s&%s", methodcode,baseurlcode,paramvalcode);
 		
-		return sign ;   
+		return HMACSHA1.HmacSHA1Encrypt(signstr, accessToken)   ;
 	}
 	
-	/**
-	 * 得到当前accesstoken，如果失效，通过upaccesstoken接口重新获取
-	 * 
-	 * @author likai
-	 *
-	 */
 	private String getAccessToken(int tenantId, boolean isInit) {
 		
 		String accessToken = "";
@@ -339,31 +283,32 @@ public class GrowingIoServiceMgr  {
 	}
 	
 	private String getrefAccessTokenForTeanan(int tenantId){
-		return null;
+		GrowingIoCompanyAction action = growingIoCompanyRepository.findByTenantId(Long.valueOf(tenantId));
+		if(action!=null){
+			return action.getRefreshToken();
+		}else{
+			return null;
+		}
 	}
 	
 	
-	/**
-	 * growing接口 update  accesstoken
-	 * 
-	 * @author likai
-	 *
-	 */
+	
     private String processAccessToken(int tenantId){
     	String accessToken = "";
+    	clearGrowingAccessToken(tenantId);
     	String refAccessToken = getrefAccessTokenForTeanan(tenantId);
     	if(!Strings.isNullOrEmpty(refAccessToken)){
     		UpdateRegisterDataReq req = new UpdateRegisterDataReq();
-    		req.setClientId(client_id);
-    		req.setClientSecret(client_secret);
-    		req.setRefreshToken("refresh_token");
-    		req.setRefreshToken(refAccessToken);
+    		req.setClient_id(client_id);
+    		req.setClient_secret(client_secret);
+    		req.setGrant_type("refresh_token");
+    		req.setRefresh_token(refAccessToken);
     		req.setTimestamp(new Date().getTime());
     		ResponseEntity<UpdateRegisterDataResp> resp =growingRemoteService.updateRegister(req, String.format(INTEGATION_OATH_FOMAT, client_id,client_secret));
     		if(resp.getStatusCode().equals(HttpStatus.OK)){
-    			accessToken = resp.getBody().getAccessToken();
-
-    			setGrowingToken(tenantId, resp.getBody().getAccessToken(),-1);
+    			accessToken = resp.getBody().getAccess_token();
+    			growingIoCompanyRepository.updateGrowingRefreshTokenByTenanId(resp.getBody().getRefresh_token(), Long.valueOf(tenantId));
+    			setGrowingAccessToken(tenantId, resp.getBody().getAccess_token(),-1);
     		}else{
     			log.debug("processAccessToken :[%d],[%s]",tenantId,resp.getStatusCode().toString());
     		}
@@ -373,12 +318,6 @@ public class GrowingIoServiceMgr  {
     }
     
     
-    /**
-	 * 通过反射，得到某对象的属性值
-	 * 
-	 * @author likai
-	 *
-	 */
     public Method getDeclaredMethod(Object object, String fieldName){
         Method field = null;
         Class<?> clazz = object.getClass();
@@ -399,12 +338,6 @@ public class GrowingIoServiceMgr  {
 		return  field ;
     }
 
-    /**
-	 * 通过反射，设置某对象的属性值
-	 * 
-	 * @author likai
-	 *
-	 */
     public void setFieldValue(Object orig, String field, Object value){
 
         String setfunc = "set" + field.substring(0, 1).toUpperCase() + field.substring(1);
@@ -418,13 +351,6 @@ public class GrowingIoServiceMgr  {
         }
     }
 
-    
-    /**
-  	 * 通过反射，将对象的所有值都放在map中
-  	 * 
-  	 * @author likai
-  	 *
-  	 */
     public void getValue(Object source, Map<String, String> map) {
 
 		if (source != null) {
@@ -468,18 +394,9 @@ public class GrowingIoServiceMgr  {
     	return String.format("%s%s?%s", remoteUrl,baseurl,param) ;
     }
     
-    /**
-  	 * HMACSHA1算法实现
-  	 * 
-  	 * @author likai
-  	 *
-  	 */
-    private static class HMACSHA1 {  
+     
+    public static class HMACSHA1 {  
     	  
-        private HMACSHA1(){
-        	
-        }
-        
         private static final String MAC_NAME = "HmacSHA1";    
         private static final String ENCODING = "UTF-8";  
         
@@ -488,12 +405,9 @@ public class GrowingIoServiceMgr  {
          * @param encryptText 被签名的字符串  
          * @param encryptKey  密钥  
          * @return  
-         * @throws UnsupportedEncodingException 
-         * @throws NoSuchAlgorithmException 
-         * @throws InvalidKeyException 
          * @throws Exception  
          */    
-        public static String HmacSHA1Encrypt(String encryptText, String encryptKey) throws UnsupportedEncodingException, NoSuchAlgorithmException, InvalidKeyException     
+        public static String HmacSHA1Encrypt(String encryptText, String encryptKey) throws Exception     
         {           
             byte[] data=encryptKey.getBytes(ENCODING);  
             SecretKey secretKey = new SecretKeySpec(data, MAC_NAME);   
@@ -502,8 +416,7 @@ public class GrowingIoServiceMgr  {
             byte[] text = encryptText.getBytes(ENCODING);    
             byte[] digest = mac.doFinal(text);  
             return new HexBinaryAdapter().marshal(digest); 
-        }    
-      
+        }      
     }  
     
   

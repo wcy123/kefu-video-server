@@ -4,10 +4,12 @@ import lombok.Data;
 
 @Data
 public class DelegateRegisterDataResp {
-	private String userId ;
-	private String accountId ; 
-	private String projectId ;
-	private String accessToken ; 
-	private long expiresIn;
-	private String refreshToken;
+
+	private String user_id ;
+	private String account_id ; 
+	private String project_id ;
+	private String access_token ; 
+	private long expires_in;
+	private String refresh_token;
+
 }
