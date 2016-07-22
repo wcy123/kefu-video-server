@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.easemob.weichat.integration.constants.IntegrationStatus;
 import com.easemob.weichat.integration.modes.IntegrationResp;
 import com.easemob.weichat.integration.rest.mvc.growingio.service.IGrowingService;
-import com.easemob.weichat.models.data.ApiResponse;
 import com.easemob.weichat.rest.mvc.AbstractController;
 import com.netflix.servo.util.Strings;
 
