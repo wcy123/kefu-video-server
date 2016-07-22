@@ -283,7 +283,7 @@ public class GrowingIoServiceMgr  {
 	}
 	
 	private String getrefAccessTokenForTeanan(int tenantId){
-		GrowingIoCompanyAction action = growingIoCompanyRepository.findByTenantId(Long.valueOf(tenantId));
+		GrowingIoCompanyAction action = growingIoCompanyRepository.findByTenantId(tenantId);
 		if(action!=null){
 			return action.getRefreshToken();
 		}else{

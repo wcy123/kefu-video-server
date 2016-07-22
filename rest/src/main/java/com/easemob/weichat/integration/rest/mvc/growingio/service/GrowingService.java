@@ -28,9 +28,11 @@ import com.easemob.weichat.integration.modes.InstallSdkResp;
 import com.easemob.weichat.integration.modes.IntegrationResp;
 import com.easemob.weichat.integration.modes.IntgerationGrowingInfo;
 import com.easemob.weichat.integration.rest.mvc.growingio.jpa.GrowingIoCompanyRepository;
+import com.easemob.weichat.integration.rest.mvc.growingio.jpa.OptionsRepository;
 import com.easemob.weichat.integration.rest.mvc.growingio.jpa.ServicesessionTrackRepository;
 import com.easemob.weichat.integration.rest.mvc.growingio.jpa.UserTracksRepository;
 import com.easemob.weichat.integration.rest.mvc.growingio.jpa.entity.GrowingIoCompanyAction;
+import com.easemob.weichat.integration.rest.mvc.growingio.jpa.entity.OptionAction;
 import com.easemob.weichat.integration.rest.mvc.growingio.jpa.entity.ServicesessionTrack;
 import com.easemob.weichat.integration.rest.mvc.growingio.jpa.entity.UserTracks;
 import com.easemob.weichat.integration.rest.mvc.growingio.remote.GrowingIoServiceMgr;
@@ -61,7 +63,8 @@ public class GrowingService implements IGrowingService{
 	@Autowired
 	private ServicesessionTrackRepository servicesessionTrackRepository ;
 	
-	
+	@Autowired
+	private OptionsRepository optionsRepository;
 	
 	@Autowired
     private EntityManagerFactory emf;
@@ -75,48 +78,52 @@ public class GrowingService implements IGrowingService{
 	@Value("${kefu.growingio.client_secret}")
 	private  String client_secret;
 	
+	private boolean isGrowingIOFunc(int tenantId){
+		boolean sign  =  false ; 
+		OptionAction option = optionsRepository.findByTenantId(tenantId, "growingioEnable");
+		if(option!=null){
+			sign = Boolean.parseBoolean(option.getOptionValue());
+		}
+		
+		return sign ;
+	}
+	
 	@Override
 	public IntegrationStatus getGrowingIOJS(int tenantId, IntegrationResp resp) {
 		IntegrationStatus status = IntegrationStatus.NOKNOW ;
 		if(tenantId != 0){
-			GrowingIoCompanyAction action = growingIoCompanyRepository.findByTenantId(Long.valueOf(tenantId));
+			boolean isGrowingIoSingn = isGrowingIOFunc(tenantId);
+			if(!isGrowingIoSingn){
+				return IntegrationStatus.GROWING_TENANTID_REGEDIT_OPTION_ERROR ;
+			}
+			GrowingIoCompanyAction action = growingIoCompanyRepository.findByTenantId(tenantId);
 			if(action==null ){
 				log.debug(String.format("%d,not is growingio_user , need regedit", Long.valueOf(tenantId)));
 				status = delegateRegister(tenantId);	
 			}else{
-				status = IntegrationStatus.SUCCESS;
-			}
-			
-			if(status==IntegrationStatus.SUCCESS){
-			    action = growingIoCompanyRepository.findByTenantId(Long.valueOf(tenantId));
-			    if(action!=null){
-			    	try{
-				    	InstallSdkReq req = new InstallSdkReq();
-				    	req.setClient_id(client_id);
-				    	req.setUser_id(action.getUserId().toString());
-				    	req.setTimestamp(new Date().getTime());
-				    	
-				    	ResponseEntity<InstallSdkResp> installsdkresp = growingIOServiceDecorator.installSdk(req, action.getProjectId(), tenantId);
-				    	if(installsdkresp!=null && installsdkresp.getStatusCode().equals(HttpStatus.OK)){
-				    		resp.setEntity(installsdkresp.getBody());
-				    		status = IntegrationStatus.SUCCESS;
-				    	}else{
-				    		status = IntegrationStatus.GROWING_TENANTID_REMOTE_ERROR;
-				    		status.setTempStr(String.format(status.getDescription(), tenantId));
-				    	}
-			    	}catch (FeignException e){
-						log.debug(e.getMessage(),e);
-						status = IntegrationStatus.GROWING_TENANTID_REGEDIT_CONN_ERROR ;
-						status.setTempStr(String.format(status.getDescription(), tenantId,growingIOServiceDecorator.analyzeFeignException(e)));
-					}catch(Exception e){
-						log.debug(e.getMessage(),e);
-						status = IntegrationStatus.GROWING_TENANTID_REGEDIT_CONN_ERROR ;
-						status.setTempStr(String.format(status.getDescription(), tenantId,e.getMessage()));
-					}
-			    }else{
-			    	log.debug(String.format("%d,经过注册以后，在growing_io_company表中没有数据", tenantId));
-					status = IntegrationStatus.GROWING_TENANTID_NOT_ANGET;
-			    }
+				try{
+			    	InstallSdkReq req = new InstallSdkReq();
+			    	req.setClient_id(client_id);
+			    	req.setUser_id(action.getUserId().toString());
+			    	req.setTimestamp(new Date().getTime());
+			    	
+			    	ResponseEntity<InstallSdkResp> installsdkresp = growingIOServiceDecorator.installSdk(req, action.getProjectId(), tenantId);
+			    	if(installsdkresp!=null && installsdkresp.getStatusCode().equals(HttpStatus.OK)){
+			    		resp.setEntity(installsdkresp.getBody());
+			    		status = IntegrationStatus.SUCCESS;
+			    	}else{
+			    		status = IntegrationStatus.GROWING_TENANTID_REMOTE_ERROR;
+			    		status.setTempStr(String.format(status.getDescription(), tenantId));
+			    	}
+		    	}catch (FeignException e){
+					log.debug(e.getMessage(),e);
+					status = IntegrationStatus.GROWING_TENANTID_REGEDIT_CONN_ERROR ;
+					status.setTempStr(String.format(status.getDescription(), tenantId,growingIOServiceDecorator.analyzeFeignException(e)));
+				}catch(Exception e){
+					log.debug(e.getMessage(),e);
+					status = IntegrationStatus.GROWING_TENANTID_REGEDIT_CONN_ERROR ;
+					status.setTempStr(String.format(status.getDescription(), tenantId,e.getMessage()));
+				}
 				
 			}
 			
@@ -149,13 +156,14 @@ public class GrowingService implements IGrowingService{
 	
 	private IntegrationStatus delegateRegister(int tenantId){
 		IntegrationStatus status = IntegrationStatus.NOKNOW ; 
+		
 		DelegateRegisterDataReq req = new DelegateRegisterDataReq();
 		
 	    List<AgentUser>	agentlist = agentUserRepository.findByTenantId(tenantId);
 	    if(agentlist.isEmpty()){
 	    	req.setCompany(agentlist.get(0).getNicename());
 	    	
-	    	req.setEmail(agentlist.get(0).getUsername());
+	    	req.setEmail(String.format("%s@easemob.com", agentlist.get(0).getUserId()));
 	    	req.setTimestamp(new Date().getTime());
 	  
 	    	try{
@@ -181,9 +189,15 @@ public class GrowingService implements IGrowingService{
 	public IntegrationStatus getGrowingDashBoard(int tenantId, IntegrationResp resp) {
 		IntegrationStatus status = IntegrationStatus.NOKNOW ;
 		if(tenantId != 0){
-			GrowingIoCompanyAction action = growingIoCompanyRepository.findByTenantId(Long.valueOf(tenantId));
+			
+			boolean isGrowingIoSingn = isGrowingIOFunc(tenantId);
+			if(!isGrowingIoSingn){
+				return IntegrationStatus.GROWING_TENANTID_REGEDIT_OPTION_ERROR ;
+			}
+			
+			GrowingIoCompanyAction action = growingIoCompanyRepository.findByTenantId(tenantId);
 			if(action==null ){
-				log.debug(String.format("%d,没有注册Growing账户，需要注册", Long.valueOf(tenantId)));
+				log.debug(String.format("%d,没有注册Growing账户，需要注册", tenantId));
 				status = delegateRegister(tenantId);	
 			}else{
 				status = IntegrationStatus.SUCCESS;
@@ -225,7 +239,12 @@ public class GrowingService implements IGrowingService{
 	@Override
 	public IntegrationStatus doGrowingIORegedit(int tenantId, IntegrationResp resp) {
 		IntegrationStatus status = IntegrationStatus.NOKNOW ;
-		GrowingIoCompanyAction action = growingIoCompanyRepository.findByTenantId(Long.valueOf(tenantId));
+		boolean isGrowingIoSingn = isGrowingIOFunc(tenantId);
+		if(!isGrowingIoSingn){
+			return IntegrationStatus.GROWING_TENANTID_REGEDIT_OPTION_ERROR ;
+		}
+		
+		GrowingIoCompanyAction action = growingIoCompanyRepository.findByTenantId(tenantId);
 		if(action==null ){
 			status = delegateRegister(tenantId);	
 		}else{
@@ -240,7 +259,13 @@ public class GrowingService implements IGrowingService{
 	@Override
 	public IntegrationStatus isGrowingIOUserInfo(int tenantId, IntegrationResp resp) {
 		IntegrationStatus status = IntegrationStatus.NOKNOW ;
-		GrowingIoCompanyAction action = growingIoCompanyRepository.findByTenantId(Long.valueOf(tenantId));
+		
+		boolean isGrowingIoSingn = isGrowingIOFunc(tenantId);
+		if(!isGrowingIoSingn){
+			return IntegrationStatus.GROWING_TENANTID_REGEDIT_OPTION_ERROR ;
+		}
+		
+		GrowingIoCompanyAction action = growingIoCompanyRepository.findByTenantId(tenantId);
 		if(action==null ){
 			status = IntegrationStatus.GROWING_TENANTID_REGEDIT_ERROR;
 		}else{
@@ -254,9 +279,10 @@ public class GrowingService implements IGrowingService{
 	@Override
 	public IntegrationStatus loadGrowingIOInfo(String integrationMessage) {
 		IntegrationStatus status = IntegrationStatus.NOKNOW ;
+	
 		try{
 			IntgerationGrowingInfo info = JSONUtil.getObjectMapper().readValue(integrationMessage, IntgerationGrowingInfo.class);
-			GrowingIoCompanyAction action = growingIoCompanyRepository.findByTenantId(Long.valueOf(info.getTenantId()));
+			GrowingIoCompanyAction action = growingIoCompanyRepository.findByTenantId(info.getTenantId());
 			if(action==null ){
 		    	status = IntegrationStatus.GROWING_TENANTID_NOT_ANGET;
 			}else{
@@ -354,8 +380,15 @@ public class GrowingService implements IGrowingService{
 	@Override
 	public IntegrationStatus getGrowingIOTracksUser(int tenantId, String servicesessionId,
 			IntegrationResp resp) {
+		
+		
+		boolean isGrowingIoSingn = isGrowingIOFunc(tenantId);
+		if(!isGrowingIoSingn){
+			return IntegrationStatus.GROWING_TENANTID_REGEDIT_OPTION_ERROR ;
+		}
+		
 		IntegrationStatus status = IntegrationStatus.NOKNOW ;
-		GrowingIoCompanyAction action = growingIoCompanyRepository.findByTenantId(Long.valueOf(tenantId));
+		GrowingIoCompanyAction action = growingIoCompanyRepository.findByTenantId(tenantId);
 		if(action==null ){
 			log.debug(String.format("%d,没有注册Growing账户，需要注册", Long.valueOf(tenantId)));
 			status = IntegrationStatus.GROWING_TENANTID_REGEDIT_ERROR;
@@ -370,6 +403,6 @@ public class GrowingService implements IGrowingService{
 		return status;
 		
 	}
-    
-   
+
+	
 }

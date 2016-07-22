@@ -23,4 +23,6 @@ public interface IGrowingService {
 	IntegrationStatus loadGrowingIOInfo(String integrationMessage );
 	
     void processData(List<GrowingIoInfo> array,IntgerationGrowingInfo info);
+    
+    
 }

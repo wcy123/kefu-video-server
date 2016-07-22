@@ -72,6 +72,20 @@ public class GrowingIOServiceController extends AbstractController  {
 		
 	}
 	
+	@RequestMapping(value="/v1/integration/tenants/{tenantId}/authority", method = RequestMethod.GET)
+	public ResponseEntity<IntegrationResp> authority(HttpServletRequest request,
+            @PathVariable("tenantId") int tenantId) {
+		
+		assertLogin();
+        assertTenantAdminLogin(tenantId);
+        
+        IntegrationResp respdata = new  IntegrationResp();
+        IntegrationStatus status = growingService.doGrowingIORegedit(tenantId, respdata);
+        
+        return getReturnValue(status,respdata);
+		
+	}
+	
 	
 	@RequestMapping(value="/v1/integration/tenants/{tenantId}/userinfo", method = RequestMethod.GET)
 	public ResponseEntity<IntegrationResp> isGrowingIOUserInfo(HttpServletRequest request,

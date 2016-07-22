@@ -12,6 +12,7 @@ public enum IntegrationStatus{
 	GROWING_TENANTID_REGEDIT_CONN_ERROR(5,"0005", "tenant:[%s], remote Growing fail ,detail:[%s]"),
 	GROWING_TENANTID_USER_ERROR(6,"0006", "tenant:%d,%s,did not GrowingIO User"),
 	GROWING_TENANTID_EVENT_ERROR(7,"0007", "tenant:%d,%s,did not GrowingIO User Tracks "),
+	GROWING_TENANTID_REGEDIT_OPTION_ERROR(8,"0008", "did not regedit growingioEnable Option  "),
 	NOKNOW(1,"9999", "no know");
 
 	

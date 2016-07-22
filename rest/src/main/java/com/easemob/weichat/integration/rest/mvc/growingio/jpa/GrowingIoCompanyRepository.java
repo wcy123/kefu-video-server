@@ -17,14 +17,14 @@ import com.easemob.weichat.integration.rest.mvc.growingio.jpa.entity.GrowingIoCo
  * @date 2016年7月4日
  */
 @Repository
-public interface GrowingIoCompanyRepository extends JpaRepository<GrowingIoCompanyAction, Long> {
+public interface GrowingIoCompanyRepository extends JpaRepository<GrowingIoCompanyAction,Long> {
 
-	@Query(value = "SELECT o FROM GrowingTenantAction o WHERE o.tenantId = ?1")
-	public GrowingIoCompanyAction findByTenantId(Long tenantId);
+	@Query(value = "SELECT o FROM GrowingIoCompanyAction o WHERE o.tenantId = ?1")
+	public GrowingIoCompanyAction findByTenantId(int tenantId);
 
 	@Transactional
     @Modifying
-    @Query("update GrowingTenantAction o set o.refreshToken = ?1 WHERE o.tenantId = ?2")
+    @Query("update GrowingIoCompanyAction o set o.refreshToken = ?1 WHERE o.tenantId = ?2")
     int updateGrowingRefreshTokenByTenanId(String refreshToken,Long tenantId);
 	 
 }
