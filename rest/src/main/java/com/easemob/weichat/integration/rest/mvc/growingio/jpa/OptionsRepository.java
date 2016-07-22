@@ -17,7 +17,7 @@ import com.easemob.weichat.integration.rest.mvc.growingio.jpa.entity.OptionActio
 @Repository
 public interface OptionsRepository extends JpaRepository<OptionAction,Long> {
 
-	@Query(value = "SELECT o FROM OptionAction o WHERE o.tenantId = ?0 and o.optionName=?1")
+	@Query(value = "SELECT o FROM OptionAction o WHERE o.tenantId = ?1 and o.optionName=?2")
 	public OptionAction findByTenantId(int tenantId,String optionName);
 
 	 

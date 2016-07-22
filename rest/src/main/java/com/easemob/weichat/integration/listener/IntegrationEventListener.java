@@ -4,7 +4,6 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.context.event.EventListener;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.stereotype.Component;
 
 import com.easemob.weichat.integration.modes.IntgerationGrowingInfo;
 import com.easemob.weichat.models.entity.ServiceSession;
@@ -15,7 +14,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.extern.slf4j.Slf4j;
 
 
-@Component
+
 @Slf4j
 public class IntegrationEventListener {
   

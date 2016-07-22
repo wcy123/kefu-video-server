@@ -160,7 +160,7 @@ public class GrowingService implements IGrowingService{
 		DelegateRegisterDataReq req = new DelegateRegisterDataReq();
 		
 	    List<AgentUser>	agentlist = agentUserRepository.findByTenantId(tenantId);
-	    if(agentlist.isEmpty()){
+	    if(!agentlist.isEmpty()){
 	    	req.setCompany(agentlist.get(0).getNicename());
 	    	
 	    	req.setEmail(String.format("%s@easemob.com", agentlist.get(0).getUserId()));
