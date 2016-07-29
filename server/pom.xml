@@ -108,8 +108,12 @@
     </build>
 
     <dependencies>
+        <dependency>
+            <groupId>com.easemob.kefu</groupId>
+            <artifactId>kefu-kce-client-all</artifactId>
+        </dependency>
    
-         <dependency>
+        <dependency>
             <groupId>com.easemob.kefu</groupId>
             <artifactId>kefu-integration-rest</artifactId>
             <version>${project.version}</version>
