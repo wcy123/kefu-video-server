@@ -73,6 +73,7 @@
 	<modules>
 		<module>rest</module>
 		<module>server</module>
+        <module>xdf-visitor</module>
 	</modules>
 	
 	<build>
