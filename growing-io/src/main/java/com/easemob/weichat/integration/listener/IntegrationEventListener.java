@@ -38,10 +38,8 @@ public class IntegrationEventListener {
         	}else{
         		log.debug(String.format("TenantId:%d,UserId:%s is not growing user ", serviceSession.getTenantId(),serviceSession.getVisitorUser().getUserId()));
         	}
-        	
         }
     }
-	
 	
 	private void publishToRedis(String serviceSessionId,int tenantId, String userId, Object data, MessagePublisher messagePusher) {
         if(tenantId>0){
@@ -61,7 +59,7 @@ public class IntegrationEventListener {
             this.topic = topic;
         }
 
-        public void publish(String serviceSessionId,int tenantId, String userId, Object message) {
+        public void publish(String serviceSessionId, int tenantId, String userId, Object message) {
             try{
             	IntgerationGrowingInfo data = new IntgerationGrowingInfo();
             	data.setTimestamp(System.currentTimeMillis());
@@ -69,17 +67,11 @@ public class IntegrationEventListener {
             	data.setGrowingioId(message.toString());
             	data.setTenantId(tenantId);
             	data.setServiceSessionId(serviceSessionId);
-            	
                 String value = JSONUtil.getObjectMapper().writeValueAsString(data);
-                
                 redisTemplate.boundListOps(topic).rightPush(value);
-                
             } catch (Exception e) {
                 log.error("userId is sending to {} with {}", userId, message, e);
             }
         }
-
-        
-
     }
 }
