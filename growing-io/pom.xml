@@ -22,7 +22,7 @@
   <description>kefu integration growingio</description>  
   <packaging>jar</packaging>  
   <properties> 
-    <start-class>com.easemob.weichat.integration.server.IntegrationServerStarter</start-class> 
+    <start-class>com.easemob.weichat.integration.server.GrowingioServerStarter</start-class> 
   </properties>  
   <build> 
     <resources> 

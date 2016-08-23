@@ -19,8 +19,8 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableDiscoveryClient
 @SpringBootApplication
 @ComponentScan("com.easemob.weichat")
-public class IntegrationServerStarter {
+public class GrowingioServerStarter {
     public static void main(String[] args) {
-        SpringApplication.run(IntegrationServerStarter.class, args);
+        SpringApplication.run(GrowingioServerStarter.class, args);
     }
 } 
