@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS `growing_io_company` (
   `domain` varchar(128) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `TENANID_UNIQUE` (`tenantId`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
 CREATE TABLE IF NOT EXISTS `growing_io_authority` (

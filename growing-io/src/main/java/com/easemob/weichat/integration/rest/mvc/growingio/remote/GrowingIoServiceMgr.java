@@ -50,7 +50,7 @@ public class GrowingIoServiceMgr  {
 	
 	public static final String INTEGATION_TOPIC = "kf:integation:access:token:%d";
 
-	public static final String INTEGATION_OATH_FOMAT="Oauth client_id = %s,client_secret=%s";
+	public static final String INTEGATION_OATH_FOMAT="Oauth client_id=%s,client_secret=%s";
 		
 	@Value("${kefu.growingio.client_id}")
 	private  String client_id ; 
@@ -96,7 +96,7 @@ public class GrowingIoServiceMgr  {
 		clearGrowingAccessToken( tenantId); 
 		ResponseEntity<DelegateRegisterDataResp> resp = growingRemoteService.delegateRegister(req, String.format(INTEGATION_OATH_FOMAT, client_id,client_secret));
 		if(resp.getStatusCode() == HttpStatus.OK){
-			setGrowingAccessToken(tenantId, resp.getBody().getAccess_token(),resp.getBody().getExpires_in());
+			setGrowingAccessToken(tenantId, resp.getBody().getAccessToken(),resp.getBody().getExpiresIn());
 		}
 		return resp;
 	}
@@ -171,7 +171,7 @@ public class GrowingIoServiceMgr  {
 		    url =geturl(baseurl,map);
 		    log.debug(String.format("remote:[%s]", url));
 		} catch (Exception e) {
-			log.debug(e.getMessage(),e);
+			log.error(e.getMessage(),e);
 		}
 		
 		return url ; 
@@ -299,16 +299,16 @@ public class GrowingIoServiceMgr  {
     	String refAccessToken = getrefAccessTokenForTeanan(tenantId);
     	if(!Strings.isNullOrEmpty(refAccessToken)){
     		UpdateRegisterDataReq req = new UpdateRegisterDataReq();
-    		req.setClient_id(client_id);
-    		req.setClient_secret(client_secret);
-    		req.setGrant_type("refresh_token");
-    		req.setRefresh_token(refAccessToken);
+    		req.setClientId(client_id);
+    		req.setClientSecret(client_secret);
+    		req.setGrantType("refresh_token");
+    		req.setRefreshToken(refAccessToken);
     		req.setTimestamp(new Date().getTime());
-    		ResponseEntity<UpdateRegisterDataResp> resp =growingRemoteService.updateRegister(req, String.format(INTEGATION_OATH_FOMAT, client_id,client_secret));
+    		ResponseEntity<UpdateRegisterDataResp> resp =growingRemoteService.updateRegister(req);
     		if(resp.getStatusCode().equals(HttpStatus.OK)){
-    			accessToken = resp.getBody().getAccess_token();
-    			growingIoCompanyRepository.updateGrowingRefreshTokenByTenanId(resp.getBody().getRefresh_token(), Long.valueOf(tenantId));
-    			setGrowingAccessToken(tenantId, resp.getBody().getAccess_token(),-1);
+    			accessToken = resp.getBody().getAccessToken();
+    			growingIoCompanyRepository.updateGrowingRefreshTokenByTenanId(resp.getBody().getRefreshToken(), tenantId);
+    			setGrowingAccessToken(tenantId, resp.getBody().getAccessToken(), resp.getBody().getExpiresIn());
     		}else{
     			log.debug("processAccessToken :[%d],[%s]",tenantId,resp.getStatusCode().toString());
     		}

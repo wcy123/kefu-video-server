@@ -25,6 +25,6 @@ public interface GrowingIoCompanyRepository extends JpaRepository<GrowingIoCompa
 	@Transactional
     @Modifying
     @Query("update GrowingIoCompanyAction o set o.refreshToken = ?1 WHERE o.tenantId = ?2")
-    int updateGrowingRefreshTokenByTenanId(String refreshToken,Long tenantId);
+    int updateGrowingRefreshTokenByTenanId(String refreshToken, int tenantId);
 	 
 }

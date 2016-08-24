@@ -23,11 +23,11 @@ import com.easemob.weichat.integration.modes.UpdateRegisterDataResp;
 @FeignClient(name = "${kefu.growingio.name}Regedit", url = "${kefu.growingio.url.regedit}")
 public interface IGrowingRemoteRegeditService {
 	
-	 @RequestMapping(method = RequestMethod.POST,value = "api/v1/users/delegate-register")			 
+	 @RequestMapping(method = RequestMethod.POST,value = "api/v1/users/delegate_register")			 
 	 ResponseEntity<DelegateRegisterDataResp> delegateRegister( @RequestBody DelegateRegisterDataReq req, @RequestHeader("Authorization") String authorization );
 	 
 	 
 	 @RequestMapping(method = RequestMethod.POST,value = "api/v1/oauth/access_token")			 
-	 ResponseEntity<UpdateRegisterDataResp> updateRegister(@RequestBody UpdateRegisterDataReq req,@RequestHeader("Authorization") String authorization);
+	 ResponseEntity<UpdateRegisterDataResp> updateRegister(@RequestBody UpdateRegisterDataReq req);
 	 
 }

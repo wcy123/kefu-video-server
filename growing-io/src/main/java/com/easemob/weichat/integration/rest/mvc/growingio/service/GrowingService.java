@@ -135,13 +135,13 @@ public class GrowingService implements IGrowingService{
 
 	private void insertRegeditInfo(DelegateRegisterDataReq req,DelegateRegisterDataResp resp,int tenantId){
 		GrowingIoCompanyAction newaction  = new GrowingIoCompanyAction();
-		newaction.setAccountId(resp.getAccount_id());
+		newaction.setAccountId(resp.getAccountId());
 		newaction.setMail(req.getEmail());
-		newaction.setProjectId( resp.getProject_id());
+		newaction.setProjectId( resp.getProjectId());
 		newaction.setTenantId(tenantId);
-		newaction.setUserId(resp.getUser_id());
+		newaction.setUserId(resp.getUserId());
 		newaction.setCreateDateTime(new Date());
-		newaction.setRefreshToken(resp.getRefresh_token());
+		newaction.setRefreshToken(resp.getRefreshToken());
 		EntityManager em = emf.createEntityManager();
         try {
             em.getTransaction().begin();
