@@ -71,6 +71,7 @@
   <modules> 
     <module>growing-io</module>  
     <module>xdf-visitor</module>
+    <module>sysinfo-manage</module>
   </modules>  
   <build> 
     <plugins> 
