@@ -14,6 +14,10 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @SpringBootApplication
 @ComponentScan("com.easemob.weichat")
 public class SysinfoManageStarter {
+    private SysinfoManageStarter(){
+        // No-op; won't be called
+    }
+
     public static void main(String[] args) {
         SpringApplication.run(SysinfoManageStarter.class, args);
     }
