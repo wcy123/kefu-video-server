@@ -104,36 +104,44 @@
   <dependencies> 
     <dependency> 
       <groupId>com.easemob.kefu</groupId>  
-      <artifactId>kefu-kce-client-all</artifactId> 
+      <artifactId>kefu-kce-client-all</artifactId>  
+      <version>${kefu-kce.version}</version> 
     </dependency>  
     <dependency> 
       <groupId>com.easemob.kefu</groupId>  
-      <artifactId>kefu-models</artifactId> 
+      <artifactId>kefu-kce-feign-client</artifactId>  
+      <version>${kefu-kce.version}</version> 
     </dependency>  
     <dependency> 
       <groupId>com.easemob.kefu</groupId>  
-      <artifactId>kefu-services-api</artifactId> 
+      <artifactId>kefu-models</artifactId>  
+      <version>${kefu.version}</version> 
     </dependency>  
     <dependency> 
       <groupId>com.easemob.kefu</groupId>  
-      <artifactId>kefu-kce-feign-client</artifactId> 
+      <artifactId>kefu-services-api</artifactId>  
+      <version>${kefu.version}</version> 
     </dependency>  
     <dependency> 
       <groupId>com.easemob.kefu</groupId>  
-      <artifactId>kefu-persistence</artifactId> 
+      <artifactId>kefu-persistence</artifactId>  
+      <version>${kefu.version}</version> 
     </dependency>  
     <dependency> 
       <groupId>com.easemob.kefu</groupId>  
-      <artifactId>kefu-rest-api</artifactId> 
+      <artifactId>kefu-rest-api</artifactId>  
+      <version>${kefu.version}</version> 
     </dependency>  
     <dependency> 
       <groupId>com.netflix.servo</groupId>  
-      <artifactId>servo-core</artifactId> 
+      <artifactId>servo-core</artifactId>  
+      <version>${netflix-servo.version}</version> 
     </dependency>  
     <dependency> 
       <groupId>net.sf.jopt-simple</groupId>  
-      <artifactId>jopt-simple</artifactId> 
-    </dependency>  
+      <artifactId>jopt-simple</artifactId>  
+      <version>${jopt-simple.version}</version> 
+    </dependency> 
     <dependency> 
       <groupId>mysql</groupId>  
       <artifactId>mysql-connector-java</artifactId> 
