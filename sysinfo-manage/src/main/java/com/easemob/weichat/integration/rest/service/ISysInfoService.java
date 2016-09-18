@@ -7,7 +7,7 @@ import com.easemob.weichat.integration.data.ReceivedId;
 import com.easemob.weichat.models.data.ApiResponse;
 
 public interface ISysInfoService {
-    ResponseEntity<ApiResponse> DoAddNewVersion(NewVersionInfo newVersionInfoData);
+    ResponseEntity<ApiResponse> doAddNewVersion(NewVersionInfo newVersionInfoData);
 
     ResponseEntity<ApiResponse> doCheckVerInfoRead(Integer tenantId, String agentId);
 

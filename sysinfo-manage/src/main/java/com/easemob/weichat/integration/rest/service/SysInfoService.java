@@ -104,11 +104,9 @@ public class SysInfoService implements ISysInfoService {
     }
 
     @Override
-    public ResponseEntity<ApiResponse> DoAddNewVersion(NewVersionInfo newVersionInfoData) {
+    public ResponseEntity<ApiResponse> doAddNewVersion(NewVersionInfo newVersionInfoData) {
         ApiResponse apiResponse = new ApiResponse();
         NewVersionInfo savedVersionInfoData = getVersionInfo();
-
-        log.info("===== new Version info ======  id:{}, Content:{}", newVersionInfoData.getId(), newVersionInfoData.getContent());
 
         // 检查REDIS中是否有上次保存的hash key：id的值存在
         if ( savedVersionInfoData.getId() != null && savedVersionInfoData.getId().length() != 0){
