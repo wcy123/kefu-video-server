@@ -5,9 +5,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 import com.easemob.weichat.integration.data.NewVersionInfo;
+import com.easemob.weichat.integration.data.ReceivedId;
+import com.easemob.weichat.models.data.ApiResponse;
+
 import lombok.extern.slf4j.Slf4j;
 /**
  * @author shengyp
@@ -38,6 +43,96 @@ public class SysInfoService implements ISysInfoService {
 
     @Value("${kf.newSysInfo.agentSet.key.timeout}")
     private long agentSetExpireTime;
+
+    @Override
+    public ResponseEntity<ApiResponse> doCheckVerInfoRead(Integer tenantId, String agentId)
+    {
+        ApiResponse apiResponse = new ApiResponse();
+        NewVersionInfo newVersionInfoData = getVersionInfo();
+        if ( newVersionInfoData.getId() == null || newVersionInfoData.getId().length() == 0){
+            // 查看hash中的ID是否有值，如果为空，返回false，不需要发布版本信息通知
+            apiResponse.setStatus(ApiResponse.STATUS_FAIL);
+            return new ResponseEntity<ApiResponse>(apiResponse, HttpStatus.BAD_REQUEST);
+        }
+
+        addTenantIdIntoSet(tenantId.toString());
+
+        if (checkAgentidExistInSet(tenantId, agentId)) {
+            // 如果存在，则不需要向该agent推送
+            apiResponse.setStatus(ApiResponse.STATUS_FAIL);
+            return new ResponseEntity<ApiResponse>(apiResponse, HttpStatus.BAD_REQUEST);
+        }
+
+        apiResponse.setStatus(ApiResponse.STATUS_OK);
+        apiResponse.setEntity(newVersionInfoData);
+        return new ResponseEntity<ApiResponse>(apiResponse, HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<ApiResponse> doAgentUserRead(Integer tenantId, String agentId, ReceivedId receivedId) {
+
+        boolean result = false;
+        ApiResponse apiResponse = new ApiResponse();
+        NewVersionInfo savedVersionInfoData = getVersionInfo();
+        
+        if ( !savedVersionInfoData.getId().equals(receivedId.getId()) ){
+            // 判断收到前端的ID是否当前发布的ID相同。如果不同，临界异常情况，已发布新版本，但用户一直未刷新界面
+            // 则用户还是用的旧版本发布的ID，不操作
+            apiResponse.setStatus(ApiResponse.STATUS_FAIL);
+            apiResponse.setEntity(result);
+            return new ResponseEntity<ApiResponse>(apiResponse, HttpStatus.BAD_REQUEST);
+        }
+
+        if ( savedVersionInfoData.getId() == null || savedVersionInfoData.getId().length() == 0){
+            // 查看hash中的ID是否有值，如果为空，返回false，不需要发布版本信息通知
+            apiResponse.setStatus(ApiResponse.STATUS_FAIL);
+            apiResponse.setEntity(result);
+            return new ResponseEntity<ApiResponse>(apiResponse, HttpStatus.BAD_REQUEST);
+        }
+        
+        addTenantIdIntoSet(tenantId.toString());
+
+        if (!checkAgentidExistInSet(tenantId, agentId)) {
+            // 如果该agentId不在SET:agent中，收到该POST请求，往SET:agent中添加该agentId。
+            addAgentidIntoSet(tenantId, agentId);
+            result = true;
+        }
+
+        apiResponse.setStatus(ApiResponse.STATUS_OK);
+        apiResponse.setEntity(result);
+        return new ResponseEntity<ApiResponse>(apiResponse, HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<ApiResponse> DoAddNewVersion(NewVersionInfo newVersionInfoData) {
+        ApiResponse apiResponse = new ApiResponse();
+        NewVersionInfo savedVersionInfoData = getVersionInfo();
+
+        log.info("===== new Version info ======  id:{}, Content:{}", newVersionInfoData.getId(), newVersionInfoData.getContent());
+
+        // 检查REDIS中是否有上次保存的hash key：id的值存在
+        if ( savedVersionInfoData.getId() != null && savedVersionInfoData.getId().length() != 0){
+            // 判断是否与REDIS上次保存的key:id的值相同，如果相同，则跳过本次操作
+            if (savedVersionInfoData.getId().equals(newVersionInfoData.getId()))
+            {
+                apiResponse.setStatus(ApiResponse.STATUS_FAIL);
+                return new ResponseEntity<ApiResponse>(apiResponse, HttpStatus.BAD_REQUEST);
+            }
+
+            // 先删除已经保存版本ID的 SET:agentId
+            deleteAgentUserFromSet();
+
+            // 从hash中删除旧的ID值和content值
+            deleteVersionInfo();
+        }
+
+        // 保存newVersionInfoData到hash中
+        saveVersionInfo(newVersionInfoData);
+
+        apiResponse.setStatus(ApiResponse.STATUS_OK);
+        apiResponse.setEntity(newVersionInfoData);
+        return new ResponseEntity<ApiResponse>(apiResponse, HttpStatus.OK);
+    }
 
     @Override
     public NewVersionInfo getVersionInfo(){
