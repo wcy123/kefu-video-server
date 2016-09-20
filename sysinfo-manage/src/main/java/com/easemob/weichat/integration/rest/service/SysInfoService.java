@@ -45,51 +45,42 @@ public class SysInfoService implements ISysInfoService {
     private long agentSetExpireTime;
 
     @Override
-    public ResponseEntity<ApiResponse> doCheckVerInfoRead(Integer tenantId, String agentId)
+    public NewVersionInfo doCheckVerInfoRead(Integer tenantId, String agentId)
     {
-        ApiResponse apiResponse = new ApiResponse();
         NewVersionInfo newVersionInfoData = getVersionInfo();
         if ( newVersionInfoData.getId() == null || newVersionInfoData.getId().length() == 0){
             // 查看hash中的ID是否有值，如果为空，返回false，不需要发布版本信息通知
-            apiResponse.setStatus(ApiResponse.STATUS_FAIL);
-            return new ResponseEntity<ApiResponse>(apiResponse, HttpStatus.BAD_REQUEST);
+            newVersionInfoData.setFlag(false);
+            return newVersionInfoData;
         }
 
         addTenantIdIntoSet(tenantId.toString());
-
         if (checkAgentidExistInSet(tenantId, agentId)) {
             // 如果存在，则不需要向该agent推送
-            apiResponse.setStatus(ApiResponse.STATUS_FAIL);
-            return new ResponseEntity<ApiResponse>(apiResponse, HttpStatus.BAD_REQUEST);
+            newVersionInfoData.setFlag(false);
+            return newVersionInfoData;
         }
-
-        apiResponse.setStatus(ApiResponse.STATUS_OK);
-        apiResponse.setEntity(newVersionInfoData);
-        return new ResponseEntity<ApiResponse>(apiResponse, HttpStatus.OK);
+        
+        newVersionInfoData.setFlag(true);
+        return newVersionInfoData;
     }
 
     @Override
-    public ResponseEntity<ApiResponse> doAgentUserRead(Integer tenantId, String agentId, ReceivedId receivedId) {
-
+    public boolean doAgentUserRead(Integer tenantId, String agentId, ReceivedId receivedId) {
         boolean result = false;
-        ApiResponse apiResponse = new ApiResponse();
-        NewVersionInfo savedVersionInfoData = getVersionInfo();
         
+        NewVersionInfo savedVersionInfoData = getVersionInfo();
+        if ( (savedVersionInfoData.getId() == null) || (savedVersionInfoData.getId().length() == 0)){
+            // 查看hash中的ID是否有值，如果为空，返回false，不需要发布版本信息通知
+            return result;
+        }
+
         if ( !savedVersionInfoData.getId().equals(receivedId.getId()) ){
             // 判断收到前端的ID是否当前发布的ID相同。如果不同，临界异常情况，已发布新版本，但用户一直未刷新界面
             // 则用户还是用的旧版本发布的ID，不操作
-            apiResponse.setStatus(ApiResponse.STATUS_FAIL);
-            apiResponse.setEntity(result);
-            return new ResponseEntity<ApiResponse>(apiResponse, HttpStatus.BAD_REQUEST);
+            return result;
         }
 
-        if ( savedVersionInfoData.getId() == null || savedVersionInfoData.getId().length() == 0){
-            // 查看hash中的ID是否有值，如果为空，返回false，不需要发布版本信息通知
-            apiResponse.setStatus(ApiResponse.STATUS_FAIL);
-            apiResponse.setEntity(result);
-            return new ResponseEntity<ApiResponse>(apiResponse, HttpStatus.BAD_REQUEST);
-        }
-        
         addTenantIdIntoSet(tenantId.toString());
 
         if (!checkAgentidExistInSet(tenantId, agentId)) {
@@ -98,14 +89,11 @@ public class SysInfoService implements ISysInfoService {
             result = true;
         }
 
-        apiResponse.setStatus(ApiResponse.STATUS_OK);
-        apiResponse.setEntity(result);
-        return new ResponseEntity<ApiResponse>(apiResponse, HttpStatus.OK);
+        return result;
     }
 
     @Override
-    public ResponseEntity<ApiResponse> doAddNewVersion(NewVersionInfo newVersionInfoData) {
-        ApiResponse apiResponse = new ApiResponse();
+    public boolean doAddNewVersion(NewVersionInfo newVersionInfoData) {
         NewVersionInfo savedVersionInfoData = getVersionInfo();
 
         // 检查REDIS中是否有上次保存的hash key：id的值存在
@@ -113,23 +101,17 @@ public class SysInfoService implements ISysInfoService {
             // 判断是否与REDIS上次保存的key:id的值相同，如果相同，则跳过本次操作
             if (savedVersionInfoData.getId().equals(newVersionInfoData.getId()))
             {
-                apiResponse.setStatus(ApiResponse.STATUS_FAIL);
-                return new ResponseEntity<ApiResponse>(apiResponse, HttpStatus.BAD_REQUEST);
+                return false;
             }
-
             // 先删除已经保存版本ID的 SET:agentId
             deleteAgentUserFromSet();
-
             // 从hash中删除旧的ID值和content值
             deleteVersionInfo();
         }
 
         // 保存newVersionInfoData到hash中
         saveVersionInfo(newVersionInfoData);
-
-        apiResponse.setStatus(ApiResponse.STATUS_OK);
-        apiResponse.setEntity(newVersionInfoData);
-        return new ResponseEntity<ApiResponse>(apiResponse, HttpStatus.OK);
+        return true;
     }
 
     @Override

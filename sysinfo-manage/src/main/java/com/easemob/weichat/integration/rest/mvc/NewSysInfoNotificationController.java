@@ -1,6 +1,7 @@
 package com.easemob.weichat.integration.rest.mvc;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -30,25 +31,45 @@ public class NewSysInfoNotificationController extends AbstractController{
     public ResponseEntity<ApiResponse> checkVersionInfoRead (@PathVariable("tenantId") Integer tenantId,
             @PathVariable("agentId") String agentId){
         assertTenantLogin(tenantId);
+        ApiResponse apiResponse = new ApiResponse();
+
         // 检查客服是否已经读取新版本发布信息
-        return sysInfoService.doCheckVerInfoRead(tenantId, agentId);
+        NewVersionInfo newVersionInfoData = sysInfoService.doCheckVerInfoRead(tenantId, agentId);
+
+        apiResponse.setEntity(newVersionInfoData);
+        return new ResponseEntity<ApiResponse>(apiResponse, HttpStatus.OK);
     }
 
     @RequestMapping(value = "/v1/tenants/{tenantId}/agents/{agentId}/news", method = RequestMethod.POST)
     public ResponseEntity<ApiResponse> agentUserRead(@PathVariable("tenantId") Integer tenantId,
             @PathVariable("agentId") String agentId, @RequestBody ReceivedId receivedId) {
         assertTenantLogin(tenantId);
+        ApiResponse apiResponse = new ApiResponse();
+        boolean result = false;
 
         // 客服已经读取新版本信息，记录在redis数据库中
-        
-        return sysInfoService.doAgentUserRead(tenantId, agentId, receivedId);
+        result =  sysInfoService.doAgentUserRead(tenantId, agentId, receivedId);
+
+        apiResponse.setEntity(result);
+        return new ResponseEntity<ApiResponse>(apiResponse, HttpStatus.OK);
     }
 
     @RequestMapping(value = "/v1/news", method = RequestMethod.POST)
     public ResponseEntity<ApiResponse> addNewVersion(@RequestBody NewVersionInfo newVersionInfoData) {
-
+        ApiResponse apiResponse = new ApiResponse();
+        
         log.info("===== new Version info ======  id:{}, Content:{}", newVersionInfoData.getId(), newVersionInfoData.getContent());
         // 新版本信息发布，通知系统
-        return sysInfoService.doAddNewVersion(newVersionInfoData);
+        boolean flag = sysInfoService.doAddNewVersion(newVersionInfoData);
+        
+        if (flag == true){
+            newVersionInfoData.setFlag(true);
+        }
+        else
+        {
+            newVersionInfoData.setFlag(false);
+        }
+        apiResponse.setEntity(newVersionInfoData);
+        return new ResponseEntity<ApiResponse>(apiResponse, HttpStatus.OK);
     }
 }

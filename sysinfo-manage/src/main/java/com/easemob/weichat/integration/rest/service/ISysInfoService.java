@@ -7,11 +7,11 @@ import com.easemob.weichat.integration.data.ReceivedId;
 import com.easemob.weichat.models.data.ApiResponse;
 
 public interface ISysInfoService {
-    ResponseEntity<ApiResponse> doAddNewVersion(NewVersionInfo newVersionInfoData);
+    NewVersionInfo doCheckVerInfoRead(Integer tenantId, String agentId);
 
-    ResponseEntity<ApiResponse> doCheckVerInfoRead(Integer tenantId, String agentId);
+    boolean doAgentUserRead(Integer tenantId, String agentId, ReceivedId receivedId);
 
-    ResponseEntity<ApiResponse> doAgentUserRead(Integer tenantId, String agentId, ReceivedId receivedId);
+    boolean doAddNewVersion(NewVersionInfo newVersionInfoData);
 
     NewVersionInfo getVersionInfo();
 

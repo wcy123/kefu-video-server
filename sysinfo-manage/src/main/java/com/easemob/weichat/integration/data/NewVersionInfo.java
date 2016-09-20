@@ -11,7 +11,7 @@ import lombok.Data;
 @Data
 public class NewVersionInfo implements Serializable {
     private static final long serialVersionUID = -5304512282800019216L;
-
+    private boolean flag;
     private String id;
     private String content;
 }
