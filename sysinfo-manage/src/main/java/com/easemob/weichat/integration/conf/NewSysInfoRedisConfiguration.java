@@ -23,19 +23,19 @@ import redis.clients.jedis.JedisPoolConfig;
 @Configuration
 public class NewSysInfoRedisConfiguration {
 
-    @Value("${spring.redis.host}")
+    @Value("${kf.sysinfomanage.redis.host}")
     private String newSysInfoRedisHost;
-    @Value("${spring.redis.port}")
+    @Value("${kf.sysinfomanage.redis.port}")
     private int newSysInfoRedisPort;
-    @Value("${spring.redis.timeout}")
+    @Value("${kf.sysinfomanage.redis.timeout}")
     private int newSysInfoRedisTimeout;
-    @Value("${spring.redis.pool.max-idle}")
+    @Value("${kf.sysinfomanage.redis.pool.max-idle}")
     private int newSysInfoRedisPoolMaxIdle;
-    @Value("${spring.redis.pool.min-idle}")
+    @Value("${kf.sysinfomanage.redis.pool.min-idle}")
     private int newSysInfoRedisPoolMinIdle;
-    @Value("${spring.redis.pool.max-wait}")
+    @Value("${kf.sysinfomanage.redis.pool.max-wait}")
     private int newSysInfoRedisPoolMaxWait;
-    @Value("${spring.redis.pool.max-total}")
+    @Value("${kf.sysinfomanage.redis.pool.max-total}")
     private int newSysInfoRedisPoolMaxTotal;
 
     @Bean(name="newSysInfoRedisTemplate")
