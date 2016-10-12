@@ -108,11 +108,30 @@
       <artifactId>kefu-kce-client-all</artifactId>  
       <version>${kefu-kce.version}</version> 
     </dependency>  
+   <dependency>
+        <groupId>com.easemob.kefu</groupId>
+        <artifactId>event-source</artifactId>
+        <version>${kefu.version}</version>
+        <exclusions>
+            <exclusion>
+                <groupId>org.apache.poi</groupId>
+                <artifactId>poi</artifactId>
+            </exclusion>
+            <exclusion>
+                <groupId>org.apache.poi</groupId>
+                <artifactId>poi-ooxml</artifactId>
+            </exclusion>
+            <exclusion>
+                <groupId>org.apache.poi</groupId>
+                <artifactId>poi-ooxml-schemas</artifactId>
+            </exclusion>
+        </exclusions>
+    </dependency>
     <dependency> 
       <groupId>com.easemob.kefu</groupId>  
       <artifactId>kefu-rest-api</artifactId>  
       <version>${kefu.version}</version> 
-    </dependency>  
+    </dependency>
     <!-- Utils -->
     <dependency> 
       <groupId>org.projectlombok</groupId>  
