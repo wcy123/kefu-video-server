@@ -37,6 +37,9 @@ public class SysInfoService implements ISysInfoService {
 
     @Value("${kf.newSysInfo.tenantSet.key.prefix}")
     private String tenantSetKey;
+    
+    @Value("${kf.newSysInfo.tenantSet.need.inform.key.prefix}")
+    private String tenantSetNeedInformKey;
 
     @Value("${kf.newSysInfo.agentSet.key.prefix}")
     private String agentSetPrefix;
@@ -60,7 +63,13 @@ public class SysInfoService implements ISysInfoService {
             newVersionInfoData.setFlag(false);
             return newVersionInfoData;
         }
-        
+
+        if (!checkIfAgentNeedInforming(tenantId)) {
+            // 检查该Agent的tenantId是否在通知Set里面，如果不在，则不需要通知
+            newVersionInfoData.setFlag(false);
+            return newVersionInfoData;
+        }
+
         newVersionInfoData.setFlag(true);
         return newVersionInfoData;
     }
@@ -72,6 +81,11 @@ public class SysInfoService implements ISysInfoService {
         NewVersionInfo savedVersionInfoData = getVersionInfo();
         if ( (savedVersionInfoData.getId() == null) || (savedVersionInfoData.getId().length() == 0)){
             // 查看hash中的ID是否有值，如果为空，返回false，不需要发布版本信息通知
+            return result;
+        }
+
+        if (!checkIfAgentNeedInforming(tenantId)) {
+            // 检查该Agent的tenantId是否在通知Set里面，如果不在，则不需要操作
             return result;
         }
 
@@ -160,6 +174,13 @@ public class SysInfoService implements ISysInfoService {
         String agentKey = agentSetPrefix + ":" + tenantId.toString() + ":" + savedId;
 
         return newVersionRedisTemplate.boundSetOps(agentKey).isMember(agentId);
+    }
+
+    private boolean checkIfAgentNeedInforming(Integer tenantId){
+        String savedId = (String) newVersionRedisTemplate.boundHashOps(latestVerisonInfo).get(idKey);
+        String agentKey = tenantSetNeedInformKey + ":" + savedId;
+
+        return newVersionRedisTemplate.boundSetOps(agentKey).isMember(tenantId.toString());
     }
 
     @Override
