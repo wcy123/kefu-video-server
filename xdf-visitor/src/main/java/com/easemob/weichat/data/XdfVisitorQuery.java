@@ -30,4 +30,6 @@ public class XdfVisitorQuery  {
     @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
     private Date endDate;
     
+    private String fileEncoding;
+    
 }

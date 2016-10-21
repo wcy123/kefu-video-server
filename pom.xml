@@ -52,7 +52,7 @@
     <hystrix.version>1.4.3</hystrix.version>  
     <archaius.version>0.7.3</archaius.version>  
     <commons.lang.version>2.6</commons.lang.version>  
-    <kefu.version>43.8.5.FINAL</kefu.version>  
+    <kefu.version>43.11.0-SNAPSHOT</kefu.version>  
     <kefu-kce.version>1.2.2.FINAL</kefu-kce.version>  
     <netflix-servo.version>0.12.8</netflix-servo.version>  
     <jopt-simple.version>5.0.2</jopt-simple.version> 
