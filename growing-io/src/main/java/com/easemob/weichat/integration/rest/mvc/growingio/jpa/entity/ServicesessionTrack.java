@@ -1,11 +1,8 @@
 package com.easemob.weichat.integration.rest.mvc.growingio.jpa.entity;
 
-import java.util.UUID;
-
 import org.springframework.data.cassandra.mapping.Column;
 import org.springframework.data.cassandra.mapping.PrimaryKey;
 import org.springframework.data.cassandra.mapping.Table;
-
 import lombok.Data;
 
 @Data
@@ -15,14 +12,15 @@ public class ServicesessionTrack {
 	private int tenantId;
 	
 	@PrimaryKey(value = "servicesession_id")
-	private UUID servicesessionId;
+	private String servicesessionId;
 	
 	@Column(value = "growingio_id")
 	private String growingioId;
 	
 	@Column(value = "visitor_id")
-	private UUID visitorId;
+	private String visitorId;
 	
 	@Column(value = "context")
 	private String context;
+	
 }

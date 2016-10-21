@@ -24,5 +24,4 @@ public interface IGrowingService {
 	
     void processData(List<GrowingIoInfo> array,IntgerationGrowingInfo info);
     
-    
 }

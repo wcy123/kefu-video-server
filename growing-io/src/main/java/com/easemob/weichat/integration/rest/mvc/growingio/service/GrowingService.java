@@ -1,44 +1,52 @@
 package com.easemob.weichat.integration.rest.mvc.growingio.service;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
-
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-
 import com.easemob.weichat.integration.constants.IntegrationStatus;
+import com.easemob.weichat.integration.consumer.MessagePublisher;
 import com.easemob.weichat.integration.modes.DashboardReq;
 import com.easemob.weichat.integration.modes.DashboardResp;
 import com.easemob.weichat.integration.modes.DelegateRegisterDataReq;
 import com.easemob.weichat.integration.modes.DelegateRegisterDataResp;
-import com.easemob.weichat.integration.modes.EventReq;
 import com.easemob.weichat.integration.modes.GrowingIoInfo;
 import com.easemob.weichat.integration.modes.InstallSdkReq;
 import com.easemob.weichat.integration.modes.InstallSdkResp;
 import com.easemob.weichat.integration.modes.IntegrationResp;
 import com.easemob.weichat.integration.modes.IntgerationGrowingInfo;
+import com.easemob.weichat.integration.modes.ServiceSessionTrackResponse;
+import com.easemob.weichat.integration.modes.VisitorTrackReq;
+import com.easemob.weichat.integration.persistence.UserTracksCassandraTemplate;
 import com.easemob.weichat.integration.rest.mvc.growingio.jpa.GrowingIoCompanyRepository;
 import com.easemob.weichat.integration.rest.mvc.growingio.jpa.OptionsRepository;
 import com.easemob.weichat.integration.rest.mvc.growingio.jpa.ServicesessionTrackRepository;
-import com.easemob.weichat.integration.rest.mvc.growingio.jpa.UserTracksRepository;
 import com.easemob.weichat.integration.rest.mvc.growingio.jpa.entity.GrowingIoCompanyAction;
 import com.easemob.weichat.integration.rest.mvc.growingio.jpa.entity.OptionAction;
 import com.easemob.weichat.integration.rest.mvc.growingio.jpa.entity.ServicesessionTrack;
 import com.easemob.weichat.integration.rest.mvc.growingio.jpa.entity.UserTracks;
 import com.easemob.weichat.integration.rest.mvc.growingio.remote.GrowingIoServiceMgr;
 import com.easemob.weichat.models.entity.AgentUser;
+import com.easemob.weichat.models.entity.ServiceSession;
+import com.easemob.weichat.models.enums.MessageType;
 import com.easemob.weichat.models.util.JSONUtil;
+import com.easemob.weichat.persistence.jdbc.JdbcServiceSessionRepositoryProvider;
 import com.easemob.weichat.persistence.jpa.AgentUserRepository;
+import com.easemob.weichat.service.data.QueueMessage;
+import com.easemob.weichat.service.data.QueueMessageData;
+import com.easemob.weichat.service.data.UserPK;
+import com.easemob.weichat.service.events.QueueMessageEvent;
 import com.google.common.collect.Maps;
 
 import feign.FeignException;
@@ -70,7 +78,17 @@ public class GrowingService implements IGrowingService{
     private EntityManagerFactory emf;
 
 	@Autowired
-	private  UserTracksRepository userTracksRepository;
+	private UserTracksCassandraTemplate userTracksCassandraTemplate;
+	
+	@Autowired
+	private JdbcServiceSessionRepositoryProvider serviceSessionRepositoryProvider;
+	
+	@Autowired
+	private ApplicationEventPublisher eventPublisher;
+	
+	@Autowired
+	private MessagePublisher messagePusher;
+
 	
 	@Value("${kefu.growingio.client_id}")
 	private  String client_id ; 
@@ -207,7 +225,7 @@ public class GrowingService implements IGrowingService{
 				try{
 					DashboardReq req = new DashboardReq();
 					req.setTimestamp(new Date().getTime());
-					req.setUser_id(action.getUserId());
+					req.setUser_id(action.getUserId());//  if action==null???
 					req.setClient_id(client_id);
 					ResponseEntity<DashboardResp> dashboardResp = growingIOServiceDecorator.dashboard( req, tenantId);
 					if(dashboardResp!=null&&dashboardResp.getStatusCode().equals(HttpStatus.OK)){
@@ -269,7 +287,6 @@ public class GrowingService implements IGrowingService{
 		if(action==null ){
 			status = IntegrationStatus.GROWING_TENANTID_REGEDIT_ERROR;
 		}else{
-			
 			status = IntegrationStatus.SUCCESS;
 		}
 		return status;
@@ -282,63 +299,99 @@ public class GrowingService implements IGrowingService{
 	
 		try{
 			IntgerationGrowingInfo info = JSONUtil.getObjectMapper().readValue(integrationMessage, IntgerationGrowingInfo.class);
+			
 			GrowingIoCompanyAction action = growingIoCompanyRepository.findByTenantId(info.getTenantId());
 			if(action==null ){
 		    	status = IntegrationStatus.GROWING_TENANTID_NOT_ANGET;
 			}else{
-				
-				EventReq req = new EventReq();
-		        req.setProject_id(action.getProjectId());
-		        req.setUser_id(info.getGrowingioId());
-		        req.setTenantId(action.getTenantId());
-		        ResponseEntity<String> respinfo = growingIOServiceDecorator.event(req);
-		        if(respinfo.getStatusCode() == HttpStatus.OK){
-		        	String json = respinfo.getBody() ;
-		        	if(!Strings.isNullOrEmpty(json)){
-		        		GrowingIoInfo[][] array = JSONUtil.getObjectMapper().readValue(json, GrowingIoInfo[][].class);
-		        		List<GrowingIoInfo>  nearList = null;
-		        		if(array!=null&&  array.length > 0 ){
-		        			for(int i = 0 ; i < array.length ; i ++){
-		        				List<GrowingIoInfo> list =Arrays.asList(array[i]) ; 
-		        				if(nearList == null){
-		        					nearList = list;
-		        				}else{
-		        					if(nearList.get(0).getTimestamp().getTime() <=list.get(0).getTimestamp().getTime()){
-		        						nearList =list;
-		        					}
-		        				}
-		        				
-		        				processData(list,info);
-		        			}
-		        			
-		        			String arrayjson = JSONUtil.getObjectMapper().writeValueAsString(nearList);
-		        			processServiceSession(arrayjson,info);
-		        		}else{
-		        			log.debug(String.format("%d,%s,is not trace", info.getTenantId(),info.getUserId()));
-		        		}
-		        	}
-		        	status = IntegrationStatus.SUCCESS;
-		        }else{
-			    	status = IntegrationStatus.GROWING_TENANTID_EVENT_ERROR;
-			    	status.setTempStr(String.format(status.getDescription(), info.getTenantId(),req.getUser_id()));
-		        }
+			    ServicesessionTrack track = servicesessionTrackRepository.findbyServicesessionId(info.getServiceSessionId());
+	            
+	            if(track==null){
+	                processServiceSession(null,info);
+	            }
+			  
+		        VisitorTrackReq visitorTrackReq=new VisitorTrackReq();
+		        visitorTrackReq.setProjectId(action.getProjectId());
+		        visitorTrackReq.setGrowingUserId(info.getGrowingioId());
+		        visitorTrackReq.setTenantId(action.getTenantId());
+		        
+	            ResponseEntity<String> respinfo = growingIOServiceDecorator.visitorEvents(visitorTrackReq, action);
 
-			}
+	            status = handleEventsResponse(respinfo,visitorTrackReq,info);
+			}  
 		}catch(Exception e){
-			log.debug(e.getMessage(),e);
+			log.error("Got Exception when loading growingioinfo from redis integrationmessage {},exception {}",integrationMessage,e);
 			status = IntegrationStatus.NOKNOW;
 		}
-
         return status ;
 	}
 	
+	
+  private IntegrationStatus handleEventsResponse(ResponseEntity<String> respinfo, VisitorTrackReq visitorTrackReq, IntgerationGrowingInfo info) 
+      throws IOException {
+      IntegrationStatus status=null;
+      if(respinfo.getStatusCode() == HttpStatus.OK){
+          String json = respinfo.getBody() ;
+          if(!Strings.isNullOrEmpty(json)){
+              
+              GrowingIoInfo[][] array = JSONUtil.getObjectMapper().readValue(json, GrowingIoInfo[][].class);
+              
+              persistGrowingIoInfoArrays(array,info);
+          }
+          status = IntegrationStatus.SUCCESS;
+      }else{
+          status = IntegrationStatus.GROWING_TENANTID_EVENT_ERROR;
+          status.setTempStr(String.format(status.getDescription(), info.getTenantId(),visitorTrackReq.getGrowingUserId()));
+      }
+      return status;
+  }
+
+  private void persistGrowingIoInfoArrays(GrowingIoInfo[][] array, IntgerationGrowingInfo info) throws IOException {
+      
+      List<GrowingIoInfo>  nearList = null;
+      if(array!=null&&  array.length > 0 ){
+          for(int i = 0 ; i < array.length ; i ++){
+              List<GrowingIoInfo> list =Arrays.asList(array[i]) ; 
+              if(nearList == null){
+                  nearList = list;
+              }else{
+                  if(nearList.get(0).getTimestamp().getTime() <=list.get(0).getTimestamp().getTime()){
+                      nearList =list;
+                  }
+              }
+              processData(list,info);
+          }
+          
+          String growingJson = JSONUtil.getObjectMapper().writeValueAsString(nearList);
+          if(StringUtils.isNotBlank(growingJson)){
+               processServiceSession(growingJson,info);
+               //发送事件通知给会话对应的坐席
+               publishGotVisitorTracksEvent(info.getServiceSessionId());
+          }
+      }else{
+          log.debug(String.format("%d,%s,is not trace", info.getTenantId(),info.getUserId()));
+      }
+      
+  }
+
+  private void publishGotVisitorTracksEvent(String serviceSessionId) {
+      ServiceSession session = serviceSessionRepositoryProvider.getServiceSession(serviceSessionId);
+      if(session!=null&&StringUtils.isNotBlank(session.getAgentUserId())){
+          QueueMessage msg = new QueueMessage(MessageType.GotGrowingUserTracks);
+          QueueMessageEvent event = new QueueMessageEvent(new QueueMessageData(false, new UserPK(session.getTenantId(),session.getAgentUserId()), msg));
+          eventPublisher.publishEvent(event);
+      }
+  }
+
   private void processServiceSession(String growingJson,IntgerationGrowingInfo info){
 	  ServicesessionTrack track = new ServicesessionTrack();
 	  track.setTenantId(info.getTenantId());
-	  track.setVisitorId(UUID.fromString(info.getUserId()));
+	  track.setVisitorId(info.getUserId());
 	  track.setGrowingioId(info.getGrowingioId());
-	  track.setServicesessionId(UUID.fromString(info.getServiceSessionId()));
-	  track.setContext(growingJson);
+	  track.setServicesessionId(info.getServiceSessionId());
+	  if(StringUtils.isNotBlank(growingJson)){
+	      track.setContext(growingJson);
+	  }
 	  servicesessionTrackRepository.save(track);
   }
 	
@@ -349,7 +402,7 @@ public class GrowingService implements IGrowingService{
     		try{
     			UserTracks visit = new UserTracks();
     			buildUserTracks(info,growinginfo,visit);
-    			userTracksRepository.save(visit);
+    			userTracksCassandraTemplate.insert(visit);
         	}catch (Exception e){
         		log.debug(e.getMessage(),e);
         	}
@@ -368,13 +421,13 @@ public class GrowingService implements IGrowingService{
     
    
     
-    private void buildUserTracks(IntgerationGrowingInfo info,GrowingIoInfo growinginfo,Object source){
-        growingIOServiceDecorator.setFieldValue(source, "tenantId",info.getTenantId());
-        growingIOServiceDecorator.setFieldValue(source, "visitorId", UUID.fromString(info.getUserId()));
-        growingIOServiceDecorator.setFieldValue(source, "growingioId",info.getGrowingioId());
-        growingIOServiceDecorator.setFieldValue(source, "timestamp",growinginfo.getTimestamp());
-        growingIOServiceDecorator.setFieldValue(source, "attributes",covnterMapValue(growinginfo.getAttrs()));
-        growingIOServiceDecorator.setFieldValue(source, "type",growinginfo.getType());
+    private void buildUserTracks(IntgerationGrowingInfo info,GrowingIoInfo growinginfo,UserTracks source){
+      source.setTenantId(info.getTenantId());
+      source.setVisitorId(info.getUserId());
+      source.setGrowingioId(info.getGrowingioId());
+      source.setTimestamp(growinginfo.getTimestamp());
+      source.setType(growinginfo.getType());
+      source.setAttributes(covnterMapValue(growinginfo.getAttrs()));
     }
 
 	@Override
@@ -393,16 +446,25 @@ public class GrowingService implements IGrowingService{
 			log.debug(String.format("%d,没有注册Growing账户，需要注册", Long.valueOf(tenantId)));
 			status = IntegrationStatus.GROWING_TENANTID_REGEDIT_ERROR;
 		}else{
-			ServicesessionTrack track = servicesessionTrackRepository.findbyServicesessionId(UUID.fromString(servicesessionId));
-			if(track!=null){
-				resp.setEntity(track.getContext());
-				status = IntegrationStatus.SUCCESS;
-			}
+			ServicesessionTrack track = servicesessionTrackRepository.findbyServicesessionId(servicesessionId);
 			
+			if(track!=null){
+			    resp.setEntity(ServiceSessionTrackResponse.fromServiceSessionTrack(track));
+				status = IntegrationStatus.SUCCESS;
+				if(StringUtils.isBlank(track.getContext())){//还没有取到Growing的轨迹信息，重新获取
+				    publishToRedis(servicesessionId,tenantId,track.getVisitorId(),track.getGrowingioId());
+				}
+			}else{
+			    status = IntegrationStatus.GROWING_TENANTID_EVENT_ERROR;
+			}
 		}
 		return status;
 		
 	}
+
+  	private void publishToRedis(String serviceSessionId,int tenantId, String userId, Object grUserId) {
+        messagePusher.publish(serviceSessionId,tenantId,userId,grUserId );
+    }
 
 	
 }

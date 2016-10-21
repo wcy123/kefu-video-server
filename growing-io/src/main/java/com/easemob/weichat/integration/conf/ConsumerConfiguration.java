@@ -12,6 +12,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.easemob.weichat.integration.consumer.IntegrationEventConsumer;
+import com.easemob.weichat.integration.consumer.MessagePublisher;
 import com.easemob.weichat.integration.listener.IntegrationEventListener;
 import com.easemob.weichat.integration.rest.mvc.growingio.service.IGrowingService;
 import com.easemob.weichat.integration.rest.mvc.growingio.service.IntegrationWorker;
@@ -19,7 +20,7 @@ import com.easemob.weichat.service.events.EventServer;
 import com.easemob.weichat.service.message.BlockingRedisMessageConsumer;
 import com.easemob.weichat.service.message.IMessageConsumer;
 
-//@Configuration
+@Configuration
 public class ConsumerConfiguration {
 
 	@Autowired
@@ -42,14 +43,19 @@ public class ConsumerConfiguration {
         return cs;
     }
 	
+	@Bean 
+	public MessagePublisher messagePublisher(StringRedisTemplate redisTemplate){
+	  return new MessagePublisher(redisTemplate, topic);
+	}
+	
 	@Bean
 	public IntegrationEventConsumer serviceSessionMessageEventConsumer(ApplicationEventPublisher eventPublisher, EventServer eventServer, @Value("${kefu.kafka.topic}") String eventTopic) {
 		return new IntegrationEventConsumer(eventPublisher, eventServer, eventTopic);
 	}
 	
 	@Bean
-	public IntegrationEventListener integrationEventListener(StringRedisTemplate redisTemplate) {
-		return new IntegrationEventListener(redisTemplate, topic);
+	public IntegrationEventListener integrationEventListener(MessagePublisher messagePublisher) {
+		return new IntegrationEventListener(messagePublisher);
 	}
 	
 }

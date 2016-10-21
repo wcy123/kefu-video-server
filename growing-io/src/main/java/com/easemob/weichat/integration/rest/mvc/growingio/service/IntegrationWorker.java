@@ -17,10 +17,8 @@ public class IntegrationWorker implements Worker {
 	
     @Override
     public void run(String message) throws Exception {
-        log.debug("IntegrationWorker run message:{}", message);
+        log.info("IntegrationWorker run message:{}", message);
         growingService.loadGrowingIOInfo(message);
     }
-    
-    
 
 }

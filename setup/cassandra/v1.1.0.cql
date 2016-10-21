@@ -8,7 +8,7 @@ CREATE KEYSPACE weichat WITH replication = {'class': 'NetworkTopologyStrategy', 
 
 CREATE TABLE weichat.growing_visitor_trace (
     tenant_id bigint,
-    visitor_id uuid,
+    visitor_id text,
     timestamp timestamp,
     attrs map<text, text>,
     growingio_id text,
@@ -18,9 +18,9 @@ CREATE TABLE weichat.growing_visitor_trace (
 
 
 CREATE TABLE weichat.service_session_track (
-    servicesession_id uuid PRIMARY KEY,
+    servicesession_id text PRIMARY KEY,
     context text,
     growingio_id text,
     tenant_id bigint,
-    visitor_id uuid
+    visitor_id text
 );

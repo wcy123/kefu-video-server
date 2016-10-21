@@ -1,11 +1,13 @@
 package com.easemob.weichat.integration.rest.mvc.growingio.remote;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.URLEncoder;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.util.Base64;
 import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -15,6 +17,13 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
 
+import org.apache.commons.lang.StringUtils;
+import org.apache.http.Header;
+import org.apache.http.HeaderElement;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -22,18 +31,19 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-
 import com.easemob.weichat.integration.modes.DashboardReq;
 import com.easemob.weichat.integration.modes.DashboardResp;
 import com.easemob.weichat.integration.modes.DelegateRegisterDataReq;
 import com.easemob.weichat.integration.modes.DelegateRegisterDataResp;
-import com.easemob.weichat.integration.modes.EventReq;
+import com.easemob.weichat.integration.modes.EventReqCookie;
 import com.easemob.weichat.integration.modes.InstallSdkReq;
 import com.easemob.weichat.integration.modes.InstallSdkResp;
 import com.easemob.weichat.integration.modes.UpdateRegisterDataReq;
 import com.easemob.weichat.integration.modes.UpdateRegisterDataResp;
+import com.easemob.weichat.integration.modes.VisitorTrackReq;
 import com.easemob.weichat.integration.rest.mvc.growingio.jpa.GrowingIoCompanyRepository;
 import com.easemob.weichat.integration.rest.mvc.growingio.jpa.entity.GrowingIoCompanyAction;
+import com.easemob.weichat.util.HttpUtil;
 import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
 
@@ -44,14 +54,19 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 public class GrowingIoServiceMgr  {
 
-	public GrowingIoServiceMgr(){
-		
-	}
-	
 	public static final String INTEGATION_TOPIC = "kf:integation:access:token:%d";
 
 	public static final String INTEGATION_OATH_FOMAT="Oauth client_id=%s,client_secret=%s";
-		
+	
+	private static final RequestConfig NOREDIRECTCONFIG = RequestConfig.custom()
+        .setSocketTimeout(3000)
+        .setConnectTimeout(3000)
+        .setConnectionRequestTimeout(3000)
+        .setRedirectsEnabled(false)
+        .setCircularRedirectsAllowed(false)
+        .setRelativeRedirectsAllowed(false)
+        .build();
+	
 	@Value("${kefu.growingio.client_id}")
 	private  String client_id ; 
 	
@@ -60,6 +75,9 @@ public class GrowingIoServiceMgr  {
 	
 	@Value("${kefu.growingio.url.iframe}")
 	private String remoteUrl ;
+	
+	@Value("${kefu.growingio.url.track}")
+	private String visitorTrackHost;
 	
 	private  int repeated_num  = 3;
 	
@@ -70,7 +88,7 @@ public class GrowingIoServiceMgr  {
 	private IGrowingRemoteIframeRegeditService growingRemoteIframeRegeditService ;
 
 	@Autowired
-	private IGrowingRemoteEventService growingRemoteEventService ;
+	private IGrowingRemoteEventService growingRemoteEventService;
 	
 	@Autowired
 	private StringRedisTemplate stringRedisTemplate;
@@ -213,39 +231,103 @@ public class GrowingIoServiceMgr  {
 		return resp ;
 	}
 	
-	
-	public ResponseEntity<String> event(EventReq req){
-		ResponseEntity<String> resp = null ;
-		
-		int loop = 0;
-		boolean sucesssign = false ;
-	
-		while(loop <= repeated_num&&!sucesssign){
-			try{
-				resp = growingRemoteEventService.event(getAccessToken(req.getTenantId(), false), req.getProject_id(), req.getUser_id());;
-				sucesssign = true;
-			} catch (FeignException e) {
-				if(e.status() == 401){
-					if(loop == repeated_num -1){
-						log.debug(e.getMessage(),e);
-						throw e ;
-					}else{
-						getAccessToken(req.getTenantId(), true);
-					}
-				} else{
-					log.debug(e.getMessage(),e);
-					throw e;
-				}
-			}
-			
-			loop ++;
-		}
-		
-		return resp ; 
+	private String visitorTracksDashboard(VisitorTrackReq req,GrowingIoCompanyAction action,Map<String, String> map){
+	  DashboardReq dashboardReq = new DashboardReq();
+      dashboardReq.setTimestamp(new Date().getTime());
+      dashboardReq.setUser_id(action.getUserId());//  if action==null???
+      dashboardReq.setClient_id(client_id);
+      
+      String baseurl = String.format("/widgets/projects/%s/insights/segmentations/latest/users/%s", req.getProjectId(),req.getGrowingUserId());
+      String url = getDashBoardInfo(dashboardReq,baseurl,action.getTenantId(),map);
+      log.debug(String.format("remote:[%s]", url));
+      return url;
 	}
 	
+	private Header[] visitorTracks(VisitorTrackReq req,GrowingIoCompanyAction action) {
+        Map<String, String> map = Maps.newTreeMap() ;
+        int loop = 0;
+        boolean sucesssign = false ;
+        CloseableHttpClient client = HttpUtil.hc;
+        String requestUrl = "/widgets/projects/%s/insights/segmentations/latest/users/%s";
+        
+        Header[] headers = null;
+        
+        while (loop <= repeated_num && !sucesssign) {
+            visitorTracksDashboard(req,action,map);
+            
+            HttpGet get = new HttpGet(getRequestUrl(map,String.format(requestUrl, req.getProjectId(),req.getGrowingUserId())));
+            get.setConfig(NOREDIRECTCONFIG);
+        
+            get.addHeader("Authorization", String.format(INTEGATION_OATH_FOMAT, client_id, client_secret));
+            HttpResponse response;
+            try {
+                response = client.execute(get);
+                headers = response.getHeaders("set-cookie");
+                if (response.getStatusLine().getStatusCode() == 401) {
+                    getAccessToken(req.getTenantId(), true);
+                    loop++;
+                } else {
+                    sucesssign = true;
+                }
+            } catch (IOException e) {
+                log.error(" error when call growingIo to get Cookies for getting visitortracks info , url : {},exception : {}",get.getURI(),e);
+            } 
+          }
+          return headers;
+    }
 	
-	private String getSign(HttpMethod method,String base_uri , Object param,String accessToken) throws Exception {
+	private String getRequestUrl(Map<String, String> map, String requestUrl) {
+  	    String params = "?";
+  	        for (Map.Entry<String,String> entry : map.entrySet()) {
+        	    params += entry.getKey() + "=" + entry.getValue() + "&";
+        	}  	  
+  	    params = params.substring(0, params.length()-1);
+	    return visitorTrackHost + requestUrl + params;
+    }
+
+    public ResponseEntity<String> visitorEvents(VisitorTrackReq req,GrowingIoCompanyAction action){
+        int loop = 0;
+        boolean sucesssign = false ;
+        ResponseEntity<String> resp = null;
+        while(loop <= repeated_num && !sucesssign){
+            try {
+                EventReqCookie cookie = requestForEventReqCookie(req,action);
+    
+                resp = growingRemoteEventService.event(String.format("user_id=%s;user_session=%s", cookie.getUserId(),cookie.getUserSession()),
+                    req.getProjectId(), base64Encode(req.getGrowingUserId()));
+                sucesssign = true;
+            } catch (UnsupportedEncodingException e) {
+                log.error(" error to parse String to bytes by String's getBytes mehtod , string : {} , exception : {}",req.getGrowingUserId(),e);
+            } catch (FeignException e) {
+                if(e.status() == 401&&loop<repeated_num -1){
+                    log.debug(e.getMessage(),e);
+                    throw e ;
+                }
+            }
+            loop++;
+        }
+        return resp ;
+    }
+
+	private EventReqCookie requestForEventReqCookie(VisitorTrackReq visitorTrackReq,
+	      GrowingIoCompanyAction action) {
+	      EventReqCookie cookie = new EventReqCookie();
+	      Header[] headers = visitorTracks(visitorTrackReq, action);
+	      for(Header header : headers){
+	          HeaderElement[] elements = header.getElements();
+	          for(HeaderElement element : elements){
+	              if(StringUtils.equals(element.getName(),"user_id")){
+	                  cookie.setUserId(element.getValue());
+	              }
+	              if(StringUtils.equals(element.getName(),"user_session")){
+	                  cookie.setUserSession(element.getValue());
+	              }
+	          }
+	      }    
+	      return cookie;
+	  }
+	
+  private String getSign(HttpMethod method,String base_uri , Object param,String accessToken) throws Exception {
 
 		Map<String, String> map = Maps.newTreeMap() ;
 		getValue(param,map);
@@ -373,7 +455,6 @@ public class GrowingIoServiceMgr  {
 					}
 				}
 				catch (Exception e1) {
-					// TODO Auto-generated catch block
 				    log.debug(e1.getMessage(),e1);
 				}
 			}
@@ -422,5 +503,9 @@ public class GrowingIoServiceMgr  {
         }      
     }  
     
-  
+    private static String base64Encode(String growingUserId) throws UnsupportedEncodingException {
+        byte[] bytes=growingUserId.getBytes("UTF-8");
+        return Base64.getEncoder().encodeToString(bytes);
+    }
+    
 }
