@@ -337,11 +337,14 @@ public class GrowingService implements IGrowingService{
               GrowingIoInfo[][] array = JSONUtil.getObjectMapper().readValue(json, GrowingIoInfo[][].class);
               
               persistGrowingIoInfoArrays(array,info);
+          }else{
+              publishGotVisitorTracksEvent(info.getServiceSessionId(),"NONE");
           }
           status = IntegrationStatus.SUCCESS;
       }else{
           status = IntegrationStatus.GROWING_TENANTID_EVENT_ERROR;
           status.setTempStr(String.format(status.getDescription(), info.getTenantId(),visitorTrackReq.getGrowingUserId()));
+          publishGotVisitorTracksEvent(info.getServiceSessionId(),"ERROR");
       }
       return status;
   }
@@ -366,7 +369,7 @@ public class GrowingService implements IGrowingService{
           if(StringUtils.isNotBlank(growingJson)){
                processServiceSession(growingJson,info);
                //发送事件通知给会话对应的坐席
-               publishGotVisitorTracksEvent(info.getServiceSessionId());
+               publishGotVisitorTracksEvent(info.getServiceSessionId(),"SUCCESS");
           }
       }else{
           log.debug(String.format("%d,%s,is not trace", info.getTenantId(),info.getUserId()));
@@ -374,10 +377,10 @@ public class GrowingService implements IGrowingService{
       
   }
 
-  private void publishGotVisitorTracksEvent(String serviceSessionId) {
+  private void publishGotVisitorTracksEvent(String serviceSessionId,String gotEventDataStatus) {
       ServiceSession session = serviceSessionRepositoryProvider.getServiceSession(serviceSessionId);
       if(session!=null&&StringUtils.isNotBlank(session.getAgentUserId())){
-          QueueMessage msg = new QueueMessage(MessageType.GotGrowingUserTracks);
+          QueueMessage msg = new QueueMessage(MessageType.GotGrowingUserTracks,gotEventDataStatus);
           QueueMessageEvent event = new QueueMessageEvent(new QueueMessageData(false, new UserPK(session.getTenantId(),session.getAgentUserId()), msg));
           eventPublisher.publishEvent(event);
       }
