@@ -31,3 +31,32 @@ include::{snippets}/create_conference_post/http-response.adoc[]
 
 include::{snippets}/create_conference_post/response-fields.adoc[]
 
+== 更新会议对象
+
+MediaServer  呼叫 KEFU 的 API
+
+* 请求
+
+
+include::{snippets}/update_conference_post/curl-request.adoc[]
+
+** path parameters
+
+include::{snippets}/update_conference_post/path-parameters.adoc[]
+
+** headers
+
+无
+
+**  字段说明
+
+include::{snippets}/update_conference_post/request-fields.adoc[]
+
+* 响应
+
+include::{snippets}/update_conference_post/http-response.adoc[]
+
+** 字段说明, TYPE = OK
+
+include::{snippets}/update_conference_post/response-fields.adoc[]
+
