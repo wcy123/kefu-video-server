@@ -10,22 +10,29 @@ import static org.springframework.restdocs.payload.PayloadDocumentation.response
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.List;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
 import com.easemob.kefu.video.SampleData.TestSamples;
+import com.fasterxml.jackson.datatype.guava.GuavaModule;
 
 /**
  * 测试用例
- * 
+ *
  * Created by wangchunye on 10/26/16.
  */
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -57,11 +64,27 @@ public class CreateConferenceTest extends AbstractRestTest {
                     resFields.withPath("callbackArg").description("客服透传参数"))));
   }
 
+    @Configuration
+    @EnableWebMvc
+    @ComponentScan("com.easemob.kefu.video")
+    @Profile("CreateConferenceTest")
+    /**
+     * see
+     * http://stackoverflow.com/questions/10650196/how-to-configure-mappingjacksonhttpmessageconverter-while-using-spring-annotatio
+     * for more details
+     */
+    public static class Config extends WebMvcConfigurerAdapter {
+        @Override
+        public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
+            converters.add(converter());
+        }
 
-  @Configuration
-  @EnableWebMvc
-  @ComponentScan("com.easemob.kefu.video")
-  @Profile("CreateConferenceTest")
-  public static class Config {
-  }
+        @Bean
+        MappingJackson2HttpMessageConverter converter() {
+            MappingJackson2HttpMessageConverter converter =
+                    new MappingJackson2HttpMessageConverter();
+            converter.getObjectMapper().registerModule(new GuavaModule());
+            return converter;
+        }
+    }
 }

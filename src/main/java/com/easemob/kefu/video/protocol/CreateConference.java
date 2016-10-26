@@ -4,8 +4,12 @@ import java.net.URI;
 import java.util.Arrays;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
+import com.fasterxml.jackson.datatype.guava.GuavaDeserializers;
+
+import com.google.common.collect.ImmutableList;
 
 import lombok.Builder;
 import lombok.Data;
@@ -58,7 +62,8 @@ public interface CreateConference {
      *   ]
      * </code>
      */
-    private final String[] users;
+    @JsonDeserialize(builder = GuavaDeserializers.class)
+    private final ImmutableList<String> users;
     /**
      * 时间戳, 可以用于请求去重
      */
@@ -116,5 +121,3 @@ public interface CreateConference {
   }
 
 }
-
-

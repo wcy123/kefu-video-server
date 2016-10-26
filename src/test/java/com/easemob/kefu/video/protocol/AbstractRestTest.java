@@ -21,6 +21,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.context.WebApplicationContext;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.guava.GuavaModule;
 
 public abstract class AbstractRestTest implements BeanFactoryAware {
   @Rule
@@ -36,6 +37,7 @@ public abstract class AbstractRestTest implements BeanFactoryAware {
 
   public static <T> void assertJson(T object, String json) throws Exception {
     ObjectMapper mapper = new ObjectMapper();
+    mapper.registerModule(new GuavaModule());
     assertJson(object, json, mapper);
   }
 

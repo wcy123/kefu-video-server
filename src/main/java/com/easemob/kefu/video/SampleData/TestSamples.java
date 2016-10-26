@@ -1,6 +1,11 @@
 package com.easemob.kefu.video.SampleData;
 
+import com.google.common.collect.ImmutableList;
+
 import java.net.URI;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 import javax.ws.rs.core.UriBuilder;
 
@@ -35,8 +40,8 @@ public class TestSamples {
     return "{\n" + "  \"anyObject\":[1,2,3]\n" + "}";
   }
 
-  public static String[] users() {
-    return new String[]{user1(), user2()};
+  public static ImmutableList users() {
+    return ImmutableList.builder().add(user1()).add(user2()).build();
   }
 
   public static String user1() {
@@ -80,6 +85,7 @@ public class TestSamples {
   }
 
   public static String updateStatusResponseJson() throws JsonProcessingException {
+    List<Integer> items = Collections.unmodifiableList(Arrays.asList(0,1,2,3));
     return new ObjectMapper().writeValueAsString(updateStatusRequest());
   }
 }
