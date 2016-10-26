@@ -17,14 +17,13 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
  */
 
 @RestController
-@RequestMapping("/v1/video")
 public class Controller {
-  @RequestMapping(path = "/conferences", method = RequestMethod.POST)
+  @RequestMapping(path = "/v1/webrtc/kefu/call", method = RequestMethod.POST)
   CreateConference.Response createConference(@RequestBody CreateConference.Request request){
     return TestSamples.createConferenceResponse();
   }
 
-  @RequestMapping(path = "/conference/{sid}", method = RequestMethod.POST)
+  @RequestMapping(path = "/callback/kefu/call/{sid}", method = RequestMethod.POST)
   UpdateStatus.Response createConference(@PathVariable String sid, @RequestBody UpdateStatus.Request request){
     return TestSamples.updateStatusResponse();
   }

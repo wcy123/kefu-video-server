@@ -37,7 +37,7 @@ public class CreateConferenceTest extends AbstractRestTest {
   public void testCreateConference() throws Exception {
     final ConstrainedFields reqFields = new ConstrainedFields(CreateConference.Request.class);
     final ConstrainedFields resFields = new ConstrainedFields(CreateConference.Response.class);
-    String endpoint = "/v1/video/conferences";
+    String endpoint = "/v1/webrtc/kefu/call";
     String docName = "create_conference_post";
     final String content = TestSamples.createConferenceRequestJson();
     assertJson(TestSamples.createConferenceRequest(), content);
@@ -45,12 +45,16 @@ public class CreateConferenceTest extends AbstractRestTest {
         .andExpect(status().isOk())
         .andDo(document(docName, preprocessRequest(prettyPrint()), preprocessResponse(prettyPrint()),
             requestFields(
-                reqFields.withPath("callbackUrl").description("media server 回调 kefu server 的回调地址"),
-                reqFields.withPath("callbackArg").description("media server 回调 kefu server 的回调参数"),
-                reqFields.withPath("users[]").description("邀请参加会议的人, 内容是Easemob JID"),
+                reqFields.withPath("mediaType").description("客服请求 服务类型：VIDEO，AUDIO"),
+                reqFields.withPath("callbackUrl").description("media service 回调 kefu server 的回调地址"),
+                reqFields.withPath("callbackArg").description("media service 回调 kefu server 的回调参数"),
+                reqFields.withPath("users[]").description("邀请参加会议的人, 内容是Easemob JID, 第一个坐席人员，第二个访客"),
                 reqFields.withPath("timestamp").description("时间戳"),
-                reqFields.withPath("callExt").description("扩展信息")),
-            responseFields(resFields.withPath("sid").description("video conference 的唯一标识"))));
+                reqFields.withPath("callExt").description("扩展信息"),
+                reqFields.withPath("sign").description("请求参数签名")),
+            responseFields(
+                    resFields.withPath("sid").description("call 的唯一标识"),
+                    resFields.withPath("callbackArg").description("客服透传参数"))));
   }
 
 

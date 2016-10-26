@@ -39,7 +39,7 @@ public class UpdateStatusTest extends AbstractRestTest {
   public void testCreateConference() throws Exception {
     final AbstractRestTest.ConstrainedFields reqFields = new AbstractRestTest.ConstrainedFields(CreateConference.Request.class);
     final AbstractRestTest.ConstrainedFields resFields = new AbstractRestTest.ConstrainedFields(CreateConference.Response.class);
-    String endpoint = "/v1/video/conference/{sid}";
+    String endpoint = "/callback/kefu/call/{sid}";
     String docName = "update_conference_post";
     final String content = TestSamples.updateStatusResponseJson();
     assertJson(TestSamples.updateStatusRequest(), content);
@@ -48,8 +48,14 @@ public class UpdateStatusTest extends AbstractRestTest {
             .andDo(document(docName, preprocessRequest(prettyPrint()), preprocessResponse(prettyPrint()),
                     pathParameters(parameterWithName("sid").description("会议唯一标识")),
                     requestFields(
-                            reqFields.withPath("state").description("会议状态")),
-                    responseFields(resFields.withPath("status").description("现在还没有用"))));
+                            reqFields.withPath("state").description("会议状态"),
+                            reqFields.withPath("callbackArg").description("回调参数, media service 不用关心这个, 怎么送过去, 怎么还回来")),
+                    responseFields(resFields.withPath("status").description(String.join(",",
+                            String.valueOf(UpdateStatus.State.INIT),
+                            String.valueOf(UpdateStatus.State.CREATED),
+                            String.valueOf(UpdateStatus.State.RINGING),
+                            String.valueOf(UpdateStatus.State.TERMINATED),
+                            String.valueOf(UpdateStatus.State.ABORTED))))));
   }
 
 

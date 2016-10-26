@@ -8,12 +8,12 @@ import lombok.Builder;
 import lombok.Data;
 
 /**
- * media server -> kefu server 的回调
+ * media service -> kefu server 的回调
  *
  * Created by wangchunye on 10/26/16.
  */
 public interface UpdateStatus {
-  enum State {
+  public enum State {
     INIT, CREATED, RINGING, TERMINATED, ABORTED
   }
   @Data
@@ -23,6 +23,11 @@ public interface UpdateStatus {
   class Request {
     // ------------- 华丽的分割线 ----------
     private final State state;
+
+    /**
+     * 回调参数, media service 不用关心这个, 怎么送过去, 怎么还回来
+     */
+    private final String callbackArg;
 
     // ------------- 华丽的分割线 ----------
     @JsonPOJOBuilder(withPrefix = "")
