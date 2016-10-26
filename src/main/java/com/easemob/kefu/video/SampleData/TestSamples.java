@@ -85,7 +85,6 @@ public class TestSamples {
   }
 
   public static String updateStatusResponseJson() throws JsonProcessingException {
-    List<Integer> items = Collections.unmodifiableList(Arrays.asList(0,1,2,3));
     return new ObjectMapper().writeValueAsString(updateStatusRequest());
   }
 }
