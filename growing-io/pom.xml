@@ -15,7 +15,7 @@
   <parent> 
     <groupId>com.easemob.kefu</groupId>  
     <artifactId>kefu-integration</artifactId>  
-    <version>1.3.0-SNAPSHOT</version>
+    <version>1.4.0-SNAPSHOT</version>
   </parent>  
   <artifactId>kefu-integration-growingio</artifactId>  
   <name>kefu integration growingio</name>  
