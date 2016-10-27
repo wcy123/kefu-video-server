@@ -27,7 +27,7 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
-import com.easemob.kefu.video.SampleData.TestSamples;
+import com.easemob.kefu.video.sample.data.TestSamples;
 import com.easemob.kefu.video.protocol.create.conference.Request;
 import com.easemob.kefu.video.protocol.create.conference.Response;
 import com.fasterxml.jackson.datatype.guava.GuavaModule;

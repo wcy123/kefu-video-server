@@ -1,6 +1,6 @@
 package com.easemob.kefu.video.protocol;
 
-import com.easemob.kefu.video.SampleData.TestSamples;
+import com.easemob.kefu.video.sample.data.TestSamples;
 import com.easemob.kefu.video.protocol.create.conference.Request;
 import com.easemob.kefu.video.protocol.create.conference.Response;
 import com.easemob.kefu.video.protocol.update.status.State;

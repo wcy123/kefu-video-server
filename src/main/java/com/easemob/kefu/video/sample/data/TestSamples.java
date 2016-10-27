@@ -1,4 +1,4 @@
-package com.easemob.kefu.video.SampleData;
+package com.easemob.kefu.video.sample.data;
 
 import java.net.URI;
 import java.security.DigestException;
@@ -15,17 +15,24 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
 
 public class TestSamples {
+
+    public static final String USER1 = "easemob-demo#chatdemouiwlz1@easemob.com/mobile";
+    public static final String USER2 = "easemob-demo#chatdemouiwlz2@easemob.com/mobile";
+    public static final int TIMESTAMP1 = 1477452999;
+    public static final String SID = "1234567890";
+
+    private TestSamples() {}
+
     public static Request createConferenceRequest() throws DigestException {
-        Request request = Request.builder()
+        return Request.builder()
                 .mediaType(MediaType.VIDEO)
                 .callbackUrl(callbackUrl())
                 .callbackArg(callbackArg())
                 .users(users())
-                .timestamp(timestampForCreateConferenceRequest())
-                .callExt(callbackExt())
+                .timestamp((long) TIMESTAMP1)
+                .callExt("anystring")
                 .createSign()
                 .build();
-        return request;
     }
 
     public static URI callbackUrl() {
@@ -35,41 +42,26 @@ public class TestSamples {
     }
 
     public static String callbackArg() {
-        return "{\n" + "  \"anyObject\":[1,2,3]\n" + "}";
+        return "{\n" +
+                "  \"anyObject\":[1,2,3,4]\n" +
+                "}";
     }
 
     public static ImmutableList users() {
-        return ImmutableList.builder().add(user1()).add(user2()).build();
-    }
-
-    public static String user1() {
-        return "easemob-demo#chatdemouiwlz1@easemob.com/mobile";
-    }
-
-    public static String user2() {
-        return "easemob-demo#chatdemouiwlz2@easemob.com/mobile";
-    }
-
-    public static long timestampForCreateConferenceRequest() {
-        return 1477452999;
-    }
-
-    public static String callbackExt() {
-        return "anystring";
+        return ImmutableList.builder().add(USER1).add(USER2).build();
     }
 
     public static Response createConferenceResponse() {
-        return Response.builder().sid(sid())
+        return Response.builder().sid(SID)
                 .callbackArg(callbackArg()).build();
     }
 
-    public static String sid() {
-        return "1234567890";
-    }
-
-    public static String createConferenceRequestJson()
-            throws JsonProcessingException, DigestException {
-        return new ObjectMapper().writeValueAsString(createConferenceRequest());
+    public static String createConferenceRequestJson() {
+        try {
+            return new ObjectMapper().writeValueAsString(createConferenceRequest());
+        } catch (DigestException | JsonProcessingException e) {
+            throw new IllegalArgumentException(e);
+        }
     }
 
     public static String createConferenceResponseJson() throws JsonProcessingException {
