@@ -1,15 +1,14 @@
 package com.easemob.kefu.video.controller;
 
 import com.easemob.kefu.video.SampleData.TestSamples;
-import com.easemob.kefu.video.protocol.CreateConference;
-import com.easemob.kefu.video.protocol.UpdateStatus;
+import com.easemob.kefu.video.protocol.create_conference.Request;
+import com.easemob.kefu.video.protocol.create_conference.Response;
 
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 /**
  * 程序入口
@@ -19,12 +18,12 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 @RestController
 public class Controller {
   @RequestMapping(path = "/v1/webrtc/kefu/call", method = RequestMethod.POST)
-  CreateConference.Response createConference(@RequestBody CreateConference.Request request){
+  Response createConference(@RequestBody Request request){
     return TestSamples.createConferenceResponse();
   }
 
   @RequestMapping(path = "/callback/kefu/call/{sid}", method = RequestMethod.POST)
-  UpdateStatus.Response createConference(@PathVariable String sid, @RequestBody UpdateStatus.Request request){
+  com.easemob.kefu.video.protocol.update_status.Response createConference(@PathVariable String sid, @RequestBody com.easemob.kefu.video.protocol.update_status.Request request){
     return TestSamples.updateStatusResponse();
   }
 }

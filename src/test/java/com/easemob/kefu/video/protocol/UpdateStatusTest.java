@@ -1,6 +1,9 @@
 package com.easemob.kefu.video.protocol;
 
 import com.easemob.kefu.video.SampleData.TestSamples;
+import com.easemob.kefu.video.protocol.create_conference.Request;
+import com.easemob.kefu.video.protocol.create_conference.Response;
+import com.easemob.kefu.video.protocol.update_status.State;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -37,8 +40,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class UpdateStatusTest extends AbstractRestTest {
   @Test
   public void testCreateConference() throws Exception {
-    final AbstractRestTest.ConstrainedFields reqFields = new AbstractRestTest.ConstrainedFields(CreateConference.Request.class);
-    final AbstractRestTest.ConstrainedFields resFields = new AbstractRestTest.ConstrainedFields(CreateConference.Response.class);
+    final AbstractRestTest.ConstrainedFields reqFields = new AbstractRestTest.ConstrainedFields(Request.class);
+    final AbstractRestTest.ConstrainedFields resFields = new AbstractRestTest.ConstrainedFields(Response.class);
     String endpoint = "/callback/kefu/call/{sid}";
     String docName = "update_conference_post";
     final String content = TestSamples.updateStatusResponseJson();
@@ -51,11 +54,11 @@ public class UpdateStatusTest extends AbstractRestTest {
                             reqFields.withPath("state").description("会议状态"),
                             reqFields.withPath("callbackArg").description("回调参数, media service 不用关心这个, 怎么送过去, 怎么还回来")),
                     responseFields(resFields.withPath("status").description(String.join(",",
-                            String.valueOf(UpdateStatus.State.INIT),
-                            String.valueOf(UpdateStatus.State.CREATED),
-                            String.valueOf(UpdateStatus.State.RINGING),
-                            String.valueOf(UpdateStatus.State.TERMINATED),
-                            String.valueOf(UpdateStatus.State.ABORTED))))));
+                            String.valueOf(State.INIT),
+                            String.valueOf(State.CREATED),
+                            String.valueOf(State.RINGING),
+                            String.valueOf(State.TERMINATED),
+                            String.valueOf(State.ABORTED))))));
   }
 
 
