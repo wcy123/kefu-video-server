@@ -1,0 +1,29 @@
+= KEFU video  API 调用
+王纯业;
+:doctype: book
+@asciidoctor_options[:backend] = 'xhtml'
+:snippets: ../../target/generated-snippets
+:toc:
+:toclevels: 4
+:source-highlighter: highlight.js
+
+== 建立会议对象
+
+KEFU 呼叫 Media Server 的 API
+
+* 请求
+
+include::{snippets}/get_jid_get/curl-request.adoc[]
+
+include::{snippets}/get_jid_get/http-request.adoc[]
+
+** path parameters
+
+include::{snippets}/get_jid_get/path-parameters.adoc[]
+
+
+* 响应
+
+include::{snippets}/get_jid_get/http-response.adoc[]
+
+

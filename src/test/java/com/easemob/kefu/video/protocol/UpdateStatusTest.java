@@ -1,9 +1,16 @@
 package com.easemob.kefu.video.protocol;
 
-import com.easemob.kefu.video.sample.data.TestSamples;
-import com.easemob.kefu.video.protocol.create.conference.Request;
-import com.easemob.kefu.video.protocol.create.conference.Response;
-import com.easemob.kefu.video.protocol.update.status.State;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
+import static org.springframework.restdocs.operation.preprocess.Preprocessors.preprocessRequest;
+import static org.springframework.restdocs.operation.preprocess.Preprocessors.preprocessResponse;
+import static org.springframework.restdocs.operation.preprocess.Preprocessors.prettyPrint;
+import static org.springframework.restdocs.payload.PayloadDocumentation.requestFields;
+import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
+import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
+import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -16,17 +23,10 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
-import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
-import static org.springframework.restdocs.operation.preprocess.Preprocessors.preprocessRequest;
-import static org.springframework.restdocs.operation.preprocess.Preprocessors.preprocessResponse;
-import static org.springframework.restdocs.operation.preprocess.Preprocessors.prettyPrint;
-import static org.springframework.restdocs.payload.PayloadDocumentation.requestFields;
-import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
-import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
-import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import com.easemob.kefu.video.protocol.create.conference.Request;
+import com.easemob.kefu.video.protocol.create.conference.Response;
+import com.easemob.kefu.video.protocol.update.status.State;
+import com.easemob.kefu.video.sample.data.TestSamples;
 
 /**
  * 测试用例
@@ -42,7 +42,7 @@ public class UpdateStatusTest extends AbstractRestTest {
   public void testCreateConference() throws Exception {
     final AbstractRestTest.ConstrainedFields reqFields = new AbstractRestTest.ConstrainedFields(Request.class);
     final AbstractRestTest.ConstrainedFields resFields = new AbstractRestTest.ConstrainedFields(Response.class);
-    String endpoint = "/callback/kefu/call/{sid}";
+        String endpoint = "/v1/video/conference/{sid}";
     String docName = "update_conference_post";
     final String content = TestSamples.updateStatusResponseJson();
     assertJson(TestSamples.updateStatusRequest(), content);

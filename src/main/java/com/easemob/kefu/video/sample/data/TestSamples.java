@@ -20,6 +20,9 @@ public class TestSamples {
     public static final String USER2 = "easemob-demo#chatdemouiwlz2@easemob.com/mobile";
     public static final int TIMESTAMP1 = 1477452999;
     public static final String SID = "1234567890";
+    public static final String ORG_NAME = "easemob123";
+    public static final String APP_NAME = "app1";
+    public static final String USER_NAME = "a1";
 
     private TestSamples() {}
 
@@ -81,5 +84,13 @@ public class TestSamples {
 
     public static String updateStatusResponseJson() throws JsonProcessingException {
         return new ObjectMapper().writeValueAsString(updateStatusRequest());
+    }
+
+    public static com.easemob.kefu.video.protocol.get.jid.Response getJidResponse() {
+        return com.easemob.kefu.video.protocol.get.jid.Response.builder()
+                .orgName(ORG_NAME)
+                .appName(APP_NAME)
+                .userName(USER_NAME)
+                .build();
     }
 }
