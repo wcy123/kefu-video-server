@@ -52,8 +52,9 @@ public class TestSamples {
     }
 
     public static Response createConferenceResponse() {
-        return Response.builder().sid(SID)
-                .callbackArg(callbackArg()).build();
+        return Response.builder()
+                .sid(SID)
+                .build();
     }
 
     public static String createConferenceRequestJson() {

@@ -62,8 +62,8 @@ public class CreateConferenceTest extends AbstractRestTest {
                 reqFields.withPath("callExt").description("扩展信息"),
                 reqFields.withPath("sign").description("请求参数签名")),
             responseFields(
-                    resFields.withPath("sid").description("call 的唯一标识"),
-                    resFields.withPath("callbackArg").description("客服透传参数"))));
+                    resFields.withPath("sid").description("call 的唯一标识")
+            )));
   }
 
     @Configuration
