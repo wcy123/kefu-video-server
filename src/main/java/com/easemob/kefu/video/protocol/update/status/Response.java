@@ -1,4 +1,4 @@
-package com.easemob.kefu.video.protocol.update_status;
+package com.easemob.kefu.video.protocol.update.status;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;

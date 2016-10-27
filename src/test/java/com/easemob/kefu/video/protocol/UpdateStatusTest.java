@@ -1,9 +1,9 @@
 package com.easemob.kefu.video.protocol;
 
 import com.easemob.kefu.video.SampleData.TestSamples;
-import com.easemob.kefu.video.protocol.create_conference.Request;
-import com.easemob.kefu.video.protocol.create_conference.Response;
-import com.easemob.kefu.video.protocol.update_status.State;
+import com.easemob.kefu.video.protocol.create.conference.Request;
+import com.easemob.kefu.video.protocol.create.conference.Response;
+import com.easemob.kefu.video.protocol.update.status.State;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

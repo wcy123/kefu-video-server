@@ -1,4 +1,4 @@
-package com.easemob.kefu.video.protocol.update_status;
+package com.easemob.kefu.video.protocol.create.conference;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -8,16 +8,18 @@ import lombok.Builder;
 import lombok.Value;
 
 /**
- * MediaService 发给  KEFUServer 的回调请求
- * Created by wangchunye on 10/27/16.
+ * media server 发送给 kefu 的创建视频的响应 Created by wangchunye on 10/27/16.
  */
 @Value
 @Builder
-@JsonDeserialize(builder = Request.RequestBuilder.class)
+@JsonDeserialize(builder = Response.ResponseBuilder.class)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class Request {
+public class Response {
     // ------------- 华丽的分割线 ----------
-    private final State state;
+    /**
+     * call session id
+     */
+    private final String sid;
 
     /**
      * 回调参数, media service 不用关心这个, 怎么送过去, 怎么还回来
@@ -26,6 +28,6 @@ public class Request {
 
     // ------------- 华丽的分割线 ----------
     @JsonPOJOBuilder(withPrefix = "")
-    public static final class RequestBuilder {
+    public static final class ResponseBuilder {
     }
 }

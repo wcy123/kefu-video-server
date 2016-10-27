@@ -1,4 +1,4 @@
-package com.easemob.kefu.video.protocol.update_status;
+package com.easemob.kefu.video.protocol.update.status;
 
 /**
  * Created by wangchunye on 10/27/16.

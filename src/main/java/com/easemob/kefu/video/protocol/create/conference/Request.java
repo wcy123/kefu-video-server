@@ -1,4 +1,4 @@
-package com.easemob.kefu.video.protocol.create_conference;
+package com.easemob.kefu.video.protocol.create.conference;
 
 import java.net.URI;
 import java.security.DigestException;

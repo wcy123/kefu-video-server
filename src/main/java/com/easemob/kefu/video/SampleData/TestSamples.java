@@ -5,10 +5,10 @@ import java.security.DigestException;
 
 import javax.ws.rs.core.UriBuilder;
 
-import com.easemob.kefu.video.protocol.create_conference.MediaType;
-import com.easemob.kefu.video.protocol.create_conference.Request;
-import com.easemob.kefu.video.protocol.create_conference.Response;
-import com.easemob.kefu.video.protocol.update_status.State;
+import com.easemob.kefu.video.protocol.create.conference.MediaType;
+import com.easemob.kefu.video.protocol.create.conference.Request;
+import com.easemob.kefu.video.protocol.create.conference.Response;
+import com.easemob.kefu.video.protocol.update.status.State;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -76,13 +76,13 @@ public class TestSamples {
         return new ObjectMapper().writeValueAsString(createConferenceResponse());
     }
 
-    public static com.easemob.kefu.video.protocol.update_status.Request updateStatusRequest() {
-        return com.easemob.kefu.video.protocol.update_status.Request.builder().state(State.INIT)
+    public static com.easemob.kefu.video.protocol.update.status.Request updateStatusRequest() {
+        return com.easemob.kefu.video.protocol.update.status.Request.builder().state(State.INIT)
                 .callbackArg(callbackArg()).build();
     }
 
-    public static com.easemob.kefu.video.protocol.update_status.Response updateStatusResponse() {
-        return com.easemob.kefu.video.protocol.update_status.Response.builder().status("OK")
+    public static com.easemob.kefu.video.protocol.update.status.Response updateStatusResponse() {
+        return com.easemob.kefu.video.protocol.update.status.Response.builder().status("OK")
                 .build();
     }
 
