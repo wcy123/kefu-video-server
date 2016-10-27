@@ -43,6 +43,10 @@ public class Request {
      */
     String callbackArg;
     /**
+     * 回调时间, 在 callbackTimeoutMs 毫秒只能, 必须再次回调, 否则 kefu server 认为连接异常
+     */
+    long callbackTimeoutMs;
+    /**
      * 邀请下面这些用户加入会议, 内容是 JID<br/>
      * 约定：<br/>
      * 第一个：坐席<br/>

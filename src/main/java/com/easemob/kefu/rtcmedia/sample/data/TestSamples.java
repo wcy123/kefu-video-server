@@ -2,6 +2,8 @@ package com.easemob.kefu.rtcmedia.sample.data;
 
 import java.net.URI;
 import java.security.DigestException;
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
 import javax.ws.rs.core.UriBuilder;
 
@@ -23,6 +25,7 @@ public class TestSamples {
     public static final String ORG_NAME = "easemob123";
     public static final String APP_NAME = "app1";
     public static final String USER_NAME = "a1";
+    public static final int CALLBACK_TIMEOUT_MS = 60000;
 
     private TestSamples() {}
 
@@ -31,6 +34,7 @@ public class TestSamples {
                 .mediaType(MediaType.VIDEO)
                 .callbackUrl(callbackUrl())
                 .callbackArg(callbackArg())
+                .callbackTimeoutMs(CALLBACK_TIMEOUT_MS)
                 .users(users())
                 .timestamp((long) TIMESTAMP1)
                 .callExt("anystring")
@@ -73,12 +77,16 @@ public class TestSamples {
     }
 
     public static com.easemob.kefu.rtcmedia.protocol.update.status.Request updateStatusRequest() {
-        return com.easemob.kefu.rtcmedia.protocol.update.status.Request.builder().state(State.INIT)
+        return com.easemob.kefu.rtcmedia.protocol.update.status.Request.builder()
+                .state(State.INIT)
                 .callbackArg(callbackArg()).build();
     }
 
     public static com.easemob.kefu.rtcmedia.protocol.update.status.Response updateStatusResponse() {
-        return com.easemob.kefu.rtcmedia.protocol.update.status.Response.builder().status("OK")
+        return com.easemob.kefu.rtcmedia.protocol.update.status.Response.builder()
+                .callbackUrl(callbackUrl())
+                .callbackArg(callbackArg())
+                .callbackTimeoutMs(CALLBACK_TIMEOUT_MS)
                 .build();
     }
 
@@ -92,5 +100,11 @@ public class TestSamples {
                 .appName(APP_NAME)
                 .userName(USER_NAME)
                 .build();
+    }
+
+    public static String getStates() {
+        return String.join(",", Arrays.asList(State.values()).stream()
+                .map(State::toString)
+                .collect(Collectors.toList()));
     }
 }

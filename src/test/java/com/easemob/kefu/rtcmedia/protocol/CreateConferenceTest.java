@@ -57,6 +57,8 @@ public class CreateConferenceTest extends AbstractRestTest {
                 reqFields.withPath("mediaType").description("客服请求 服务类型：VIDEO，AUDIO"),
                 reqFields.withPath("callbackUrl").description("media service 回调 kefu server 的回调地址"),
                 reqFields.withPath("callbackArg").description("media service 回调 kefu server 的回调参数"),
+                                reqFields.withPath("callbackTimeoutMs").description(
+                                        "回调时间, 在 callbackTimeoutMs 毫秒只能, 必须再次回调, 否则 kefu server 认为连接异常"),
                 reqFields.withPath("users[]").description("邀请参加会议的人, 内容是Easemob JID, 第一个坐席人员，第二个访客"),
                 reqFields.withPath("timestamp").description("时间戳"),
                 reqFields.withPath("callExt").description("扩展信息"),

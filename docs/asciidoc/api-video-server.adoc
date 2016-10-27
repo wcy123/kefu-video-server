@@ -7,7 +7,7 @@
 :toclevels: 4
 :source-highlighter: highlight.js
 
-== 建立会议对象
+== 获取坐席 JID
 
 KEFU 呼叫 Media Server 的 API
 
