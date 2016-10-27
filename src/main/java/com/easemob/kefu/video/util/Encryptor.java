@@ -7,7 +7,10 @@ import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
 public class Encryptor {
-    public static String HmacSha1(String text, String secretKey) {
+	private Encryptor() {
+	}
+
+	public static String hmacSha1(String text, String secretKey) {
         try {
             SecretKeySpec signingKey = new SecretKeySpec(secretKey.getBytes(), "HmacSHA256");
 
