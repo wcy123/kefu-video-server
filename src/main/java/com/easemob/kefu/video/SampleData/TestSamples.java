@@ -3,6 +3,7 @@ package com.easemob.kefu.video.SampleData;
 import com.google.common.collect.ImmutableList;
 
 import java.net.URI;
+import java.security.DigestException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -16,7 +17,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class TestSamples {
-  public static CreateConference.Request createConferenceRequest() {
+  public static CreateConference.Request createConferenceRequest() throws DigestException {
     CreateConference.Request request = CreateConference.Request.builder()
             .mediaType(CreateConference.MediaType.VIDEO)
             .callbackUrl(callbackUrl())
@@ -24,10 +25,8 @@ public class TestSamples {
             .users(users())
             .timestamp(timestampForCreateConferenceRequest())
             .callExt(callbackExt())
+            .createSign()
             .build();
-
-    request.setSign(Encryptor.HMACSHA1(request.digest(), CreateConference.KEY));
-
     return request;
   }
 
@@ -69,7 +68,7 @@ public class TestSamples {
     return "1234567890";
   }
 
-  public static String createConferenceRequestJson() throws JsonProcessingException {
+  public static String createConferenceRequestJson() throws JsonProcessingException, DigestException {
     return new ObjectMapper().writeValueAsString(createConferenceRequest());
   }
 
