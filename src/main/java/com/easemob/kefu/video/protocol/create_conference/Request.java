@@ -68,7 +68,7 @@ public class Request {
         final String digest =
                 String.join("$", callbackUrl.toString(), callbackArg, users.toString(),
                         String.valueOf(timestamp), callExt);
-        return Encryptor.HMACSHA1(digest, Constant.KEY);
+        return Encryptor.HmacSha1(digest, Constant.KEY);
     }
     // ------------- 华丽的分割线 ----------
 
@@ -87,7 +87,7 @@ public class Request {
         }
 
         public RequestBuilder createSign() {
-            sign = Encryptor.HMACSHA1(digest(), Constant.KEY);
+            sign = Encryptor.HmacSha1(digest(), Constant.KEY);
             return this;
         }
 
@@ -102,7 +102,7 @@ public class Request {
         }
 
         private void verify() throws DigestException {
-            final String s = Encryptor.HMACSHA1(digest(), Constant.KEY);
+            final String s = Encryptor.HmacSha1(digest(), Constant.KEY);
             if (sign == null) {
                 throw new DigestException("please provide a sign");
             }
