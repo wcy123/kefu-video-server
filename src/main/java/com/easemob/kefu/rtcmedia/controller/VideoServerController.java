@@ -15,7 +15,7 @@ import com.easemob.kefu.rtcmedia.sample.data.TestSamples;
  * Created by wangchunye on 10/26/16.
  */
 @RestController
-@RequestMapping("/v1/video")
+@RequestMapping("/v1/rtcmedia")
 public class VideoServerController {
     @RequestMapping(path = "/conference/{sid}", method = RequestMethod.POST)
     com.easemob.kefu.rtcmedia.protocol.update.status.Response updateStatus(@PathVariable String sid,
