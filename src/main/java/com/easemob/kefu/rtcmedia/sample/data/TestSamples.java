@@ -11,7 +11,9 @@ import javax.ws.rs.core.UriBuilder;
 import com.easemob.kefu.rtcmedia.protocol.AgentCreateConference;
 import com.easemob.kefu.rtcmedia.protocol.AgentJid;
 import com.easemob.kefu.rtcmedia.protocol.CreateConference;
+import com.easemob.kefu.rtcmedia.protocol.GetStatus;
 import com.easemob.kefu.rtcmedia.protocol.UpdateStatus;
+import com.easemob.kefu.rtcmedia.protocol.types.State;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -25,7 +27,8 @@ public class TestSamples {
     public static final String SID = "1234567890";
     public static final String ORG_NAME = "easemob123";
     public static final String APP_NAME = "app1";
-    public static final String USER_NAME = "a1";
+    public static final String AGENT_USER_NAME = "a1";
+    public static final String VISITOR_USER_NAME = "v1";
     public static final int CALLBACK_TIMEOUT_MS = 60000;
 
     private TestSamples() {}
@@ -79,7 +82,7 @@ public class TestSamples {
 
     public static UpdateStatus.Request updateStatusRequest() {
         return UpdateStatus.Request.builder()
-                .state(UpdateStatus.State.INIT)
+                .state(State.INIT)
                 .callbackArg(callbackArg()).build();
     }
 
@@ -99,21 +102,25 @@ public class TestSamples {
         return AgentJid.Response.builder()
                 .orgName(ORG_NAME)
                 .appName(APP_NAME)
-                .userName(USER_NAME)
+                .userName(AGENT_USER_NAME)
                 .build();
     }
 
     public static String getStates() {
-        return String.join(",", Arrays.asList(UpdateStatus.State.values()).stream()
-                .map(UpdateStatus.State::toString)
+        return String.join(",", Arrays.asList(State.values()).stream()
+                .map(State::toString)
                 .collect(Collectors.toList()));
     }
 
     public static AgentCreateConference.Request agentCreateConferenceRequest() {
         return AgentCreateConference.Request.builder()
-                .visitorId(visitorId())
+                .agentId(agentId())
                 .mediaType(CreateConference.MediaType.VIDEO)
                 .msgId(msgId())
+                .orgName(ORG_NAME)
+                .appName(APP_NAME)
+                .agentUserName(AGENT_USER_NAME)
+                .visitorUserName(VISITOR_USER_NAME)
                 .build();
     }
 
@@ -123,6 +130,10 @@ public class TestSamples {
 
     private static UUID visitorId() {
         return UUID.fromString("cafebabe-bb24-4762-987e-bb0bd71da8fc");
+    }
+
+    private static UUID agentId() {
+        return UUID.fromString("cafebabe-bb24-4762-987e-bb0bd71d1234");
     }
 
     public static AgentCreateConference.Response agentCreateConferenceResponse() {
@@ -139,4 +150,9 @@ public class TestSamples {
         }
     }
 
+    public static GetStatus.Response getStatusResponse() {
+        return GetStatus.Response.builder()
+                .state(State.INIT)
+                .build();
+    }
 }

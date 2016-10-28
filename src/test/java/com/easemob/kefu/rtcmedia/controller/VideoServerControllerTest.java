@@ -13,6 +13,8 @@ import static org.springframework.restdocs.request.RequestDocumentation.paramete
 import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.UUID;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.SpringApplicationConfiguration;
@@ -30,6 +32,7 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import com.easemob.kefu.rtcmedia.AbstractRestTest;
 import com.easemob.kefu.rtcmedia.protocol.AgentCreateConference;
 import com.easemob.kefu.rtcmedia.protocol.AgentJid;
+import com.easemob.kefu.rtcmedia.protocol.GetStatus;
 import com.easemob.kefu.rtcmedia.protocol.UpdateStatus;
 import com.easemob.kefu.rtcmedia.sample.data.TestSamples;
 
@@ -43,6 +46,7 @@ import com.easemob.kefu.rtcmedia.sample.data.TestSamples;
 @WebAppConfiguration
 @ActiveProfiles("VideoServerControllerTest")
 public class VideoServerControllerTest extends AbstractRestTest {
+
     @Test
     public void updateStatus() throws Exception {
         final AbstractRestTest.ConstrainedFields reqFields =
@@ -114,13 +118,39 @@ public class VideoServerControllerTest extends AbstractRestTest {
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
                         requestFields(
-                                reqFields.withPath("visitorId").description("被叫访客 ID"),
+                                reqFields.withPath("agentId").description("坐席 ID"),
                                 reqFields.withPath("mediaType")
                                         .description("客服请求 服务类型：VIDEO，AUDIO"),
-                                reqFields.withPath("msgId").description(" msg id 是哪一条消息触发的这次呼叫")),
+                                reqFields.withPath("msgId").description(" msg id 是哪一条消息触发的这次呼叫"),
+                                reqFields.withPath("orgName").description("JID 里面的组织名"),
+                                reqFields.withPath("appName").description("JID 里面的应用名"),
+                                reqFields.withPath("visitorUserName").description("JID 中的访客用户名"),
+                                reqFields.withPath("agentUserName").description(
+                                        "JID 中的坐席名称, 如果坐席本地没有缓存 cookie ,那么利用 getJID 接口获取")),
                         responseFields(
                                 resFields.withPath("sid")
                                         .description("call 的唯一标识, 目前前段应该不用这个字段, "))));
+    }
+
+    @Test
+    public void getStatus() throws Exception {
+        final ConstrainedFields resFields = new ConstrainedFields(
+                GetStatus.Response.class);
+        String endpoint = "/v1/rtcmedia/conference/{msgId}";
+        String docName = "agent_get_status";
+        String content = TestSamples.agentCreateConferenceRequestJson();
+        final String states =
+                TestSamples.getStates();
+        mockMvc.perform(
+                RestDocumentationRequestBuilders.get(endpoint,
+                        UUID.fromString("3f9ce5b9-a979-4088-b47f-df23f37094e8")))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andDo(MockMvcRestDocumentation.document(docName,
+                        preprocessResponse(prettyPrint()),
+                        pathParameters(parameterWithName("msgId").description(
+                                "会议唯一标识,  一个会议既可以用 sid 表示(客服和media service 之间的协议), 也可以用 msgId 表示(客服和坐席前段之间协议)")),
+                        responseFields(
+                                resFields.withPath("state").description(states))));
     }
 
     @Configuration

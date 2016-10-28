@@ -25,10 +25,9 @@ public final class AgentCreateConference {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class Request {
         /**
-         * 被叫访客 ID
+         * 坐席 ID
          */
-        UUID visitorId;
-
+        UUID agentId;
         /**
          * 呼叫类型 AUDIO or VIDEO 现在都是 Video
          */
@@ -38,6 +37,23 @@ public final class AgentCreateConference {
          * msg id 是那一条消息触发的这次呼叫vi
          */
         UUID msgId;
+        /**
+         * JID 中的组织名
+         */
+        String orgName;
+        /**
+         * JID 中的应用名
+         */
+        String appName;
+        /**
+         * JID 中的访客用户名
+         */
+        String visitorUserName;
+
+        /**
+         * JID 中的坐席名称, 如果坐席本地没有缓存 cookie ,那么利用 getJID 接口获取
+         */
+        String agentUserName;
 
         @JsonPOJOBuilder(withPrefix = "")
         public static final class RequestBuilder {

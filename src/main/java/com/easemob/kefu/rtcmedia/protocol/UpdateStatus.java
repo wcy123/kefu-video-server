@@ -2,6 +2,7 @@ package com.easemob.kefu.rtcmedia.protocol;
 
 import java.net.URI;
 
+import com.easemob.kefu.rtcmedia.protocol.types.State;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
@@ -16,25 +17,17 @@ import lombok.Value;
 public final class UpdateStatus {
     private UpdateStatus() {}
 
-    /**
-     * Created by wangchunye on 10/27/16.
-     */
-    public enum State {
-        INIT, CREATED, RINGING, TERMINATED, ABORTED
-    }
-
     @Value
     @Builder
     @JsonDeserialize(builder = Request.RequestBuilder.class)
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class Request {
-        // ------------- 华丽的分割线 ----------
-        private final State state;
-
         /**
          * 回调参数, media service 不用关心这个, 怎么送过去, 怎么还回来
          */
         private final String callbackArg;
+        // ------------- 华丽的分割线 ----------
+        State state;
 
         // ------------- 华丽的分割线 ----------
         @JsonPOJOBuilder(withPrefix = "")

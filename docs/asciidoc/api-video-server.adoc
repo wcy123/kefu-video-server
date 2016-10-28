@@ -27,7 +27,7 @@ include::{snippets}/get_jid_get/path-parameters.adoc[]
 include::{snippets}/get_jid_get/http-response.adoc[]
 
 
-== 坐席发起视频呼叫请求
+== 坐席发起视频呼叫邀请
 
 
 * 请求
@@ -49,4 +49,20 @@ include::{snippets}/agent_create_conference/http-response.adoc[]
 
 include::{snippets}/agent_create_conference/response-fields.adoc[]
 
+== 坐席获取会议状态
 
+
+* 请求
+
+include::{snippets}/agent_get_status/curl-request.adoc[]
+
+include::{snippets}/agent_get_status/http-request.adoc[]
+
+
+* 响应
+
+include::{snippets}/agent_get_status/http-response.adoc[]
+
+** 字段
+
+include::{snippets}/agent_get_status/response-fields.adoc[]
