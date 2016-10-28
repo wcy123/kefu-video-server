@@ -27,8 +27,7 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
-import com.easemob.kefu.rtcmedia.protocol.create.conference.Request;
-import com.easemob.kefu.rtcmedia.protocol.create.conference.Response;
+import com.easemob.kefu.rtcmedia.AbstractRestTest;
 import com.easemob.kefu.rtcmedia.sample.data.TestSamples;
 import com.fasterxml.jackson.datatype.guava.GuavaModule;
 
@@ -44,8 +43,8 @@ import com.fasterxml.jackson.datatype.guava.GuavaModule;
 public class CreateConferenceTest extends AbstractRestTest {
   @Test
   public void testCreateConference() throws Exception {
-    final ConstrainedFields reqFields = new ConstrainedFields(Request.class);
-    final ConstrainedFields resFields = new ConstrainedFields(Response.class);
+        final ConstrainedFields reqFields = new ConstrainedFields(CreateConference.Request.class);
+        final ConstrainedFields resFields = new ConstrainedFields(CreateConference.Response.class);
     String endpoint = "/v1/webrtc/kefu/call";
     String docName = "create_conference_post";
     final String content = TestSamples.createConferenceRequestJson();

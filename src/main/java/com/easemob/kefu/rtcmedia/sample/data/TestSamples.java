@@ -3,14 +3,15 @@ package com.easemob.kefu.rtcmedia.sample.data;
 import java.net.URI;
 import java.security.DigestException;
 import java.util.Arrays;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.ws.rs.core.UriBuilder;
 
-import com.easemob.kefu.rtcmedia.protocol.create.conference.MediaType;
-import com.easemob.kefu.rtcmedia.protocol.create.conference.Request;
-import com.easemob.kefu.rtcmedia.protocol.create.conference.Response;
-import com.easemob.kefu.rtcmedia.protocol.update.status.State;
+import com.easemob.kefu.rtcmedia.protocol.AgentCreateConference;
+import com.easemob.kefu.rtcmedia.protocol.AgentJid;
+import com.easemob.kefu.rtcmedia.protocol.CreateConference;
+import com.easemob.kefu.rtcmedia.protocol.UpdateStatus;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -29,9 +30,9 @@ public class TestSamples {
 
     private TestSamples() {}
 
-    public static Request createConferenceRequest() throws DigestException {
-        return Request.builder()
-                .mediaType(MediaType.VIDEO)
+    public static CreateConference.Request createConferenceRequest() throws DigestException {
+        return CreateConference.Request.builder()
+                .mediaType(CreateConference.MediaType.VIDEO)
                 .callbackUrl(callbackUrl())
                 .callbackArg(callbackArg())
                 .callbackTimeoutMs(CALLBACK_TIMEOUT_MS)
@@ -58,8 +59,8 @@ public class TestSamples {
         return ImmutableList.builder().add(USER1).add(USER2).build();
     }
 
-    public static Response createConferenceResponse() {
-        return Response.builder()
+    public static CreateConference.Response createConferenceResponse() {
+        return CreateConference.Response.builder()
                 .sid(SID)
                 .build();
     }
@@ -76,14 +77,14 @@ public class TestSamples {
         return new ObjectMapper().writeValueAsString(createConferenceResponse());
     }
 
-    public static com.easemob.kefu.rtcmedia.protocol.update.status.Request updateStatusRequest() {
-        return com.easemob.kefu.rtcmedia.protocol.update.status.Request.builder()
-                .state(State.INIT)
+    public static UpdateStatus.Request updateStatusRequest() {
+        return UpdateStatus.Request.builder()
+                .state(UpdateStatus.State.INIT)
                 .callbackArg(callbackArg()).build();
     }
 
-    public static com.easemob.kefu.rtcmedia.protocol.update.status.Response updateStatusResponse() {
-        return com.easemob.kefu.rtcmedia.protocol.update.status.Response.builder()
+    public static UpdateStatus.Response updateStatusResponse() {
+        return UpdateStatus.Response.builder()
                 .callbackUrl(callbackUrl())
                 .callbackArg(callbackArg())
                 .callbackTimeoutMs(CALLBACK_TIMEOUT_MS)
@@ -94,8 +95,8 @@ public class TestSamples {
         return new ObjectMapper().writeValueAsString(updateStatusRequest());
     }
 
-    public static com.easemob.kefu.rtcmedia.protocol.get.jid.Response getJidResponse() {
-        return com.easemob.kefu.rtcmedia.protocol.get.jid.Response.builder()
+    public static AgentJid.Response getJidResponse() {
+        return AgentJid.Response.builder()
                 .orgName(ORG_NAME)
                 .appName(APP_NAME)
                 .userName(USER_NAME)
@@ -103,8 +104,39 @@ public class TestSamples {
     }
 
     public static String getStates() {
-        return String.join(",", Arrays.asList(State.values()).stream()
-                .map(State::toString)
+        return String.join(",", Arrays.asList(UpdateStatus.State.values()).stream()
+                .map(UpdateStatus.State::toString)
                 .collect(Collectors.toList()));
     }
+
+    public static AgentCreateConference.Request agentCreateConferenceRequest() {
+        return AgentCreateConference.Request.builder()
+                .visitorId(visitorId())
+                .mediaType(CreateConference.MediaType.VIDEO)
+                .msgId(msgId())
+                .build();
+    }
+
+    private static UUID msgId() {
+        return UUID.fromString("cafebabe-bb24-4762-987e-bb0bd71d1234");
+    }
+
+    private static UUID visitorId() {
+        return UUID.fromString("cafebabe-bb24-4762-987e-bb0bd71da8fc");
+    }
+
+    public static AgentCreateConference.Response agentCreateConferenceResponse() {
+        return AgentCreateConference.Response.builder()
+                .sid(SID)
+                .build();
+    }
+
+    public static String agentCreateConferenceRequestJson() {
+        try {
+            return new ObjectMapper().writeValueAsString(agentCreateConferenceRequest());
+        } catch (JsonProcessingException e) {
+            throw new IllegalArgumentException(e);
+        }
+    }
+
 }

@@ -6,7 +6,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.easemob.kefu.rtcmedia.protocol.get.jid.Response;
+import com.easemob.kefu.rtcmedia.protocol.AgentCreateConference;
+import com.easemob.kefu.rtcmedia.protocol.AgentJid;
+import com.easemob.kefu.rtcmedia.protocol.UpdateStatus;
 import com.easemob.kefu.rtcmedia.sample.data.TestSamples;
 
 /**
@@ -17,14 +19,32 @@ import com.easemob.kefu.rtcmedia.sample.data.TestSamples;
 @RestController
 @RequestMapping("/v1/rtcmedia")
 public class VideoServerController {
+    /**
+     * MediaService 回调 Kefu server
+     * 
+     * @param sid 会话 ID
+     * @param request 请求 ID
+     * @return 响应
+     */
     @RequestMapping(path = "/conference/{sid}", method = RequestMethod.POST)
-    com.easemob.kefu.rtcmedia.protocol.update.status.Response updateStatus(@PathVariable String sid,
-            @RequestBody com.easemob.kefu.rtcmedia.protocol.update.status.Request request) {
+    UpdateStatus.Response updateStatus(@PathVariable String sid,
+            @RequestBody UpdateStatus.Request request) {
         return TestSamples.updateStatusResponse();
     }
 
+    /**
+     * 坐席前段得到 JID 用于视频通信
+     * 
+     * @return
+     */
     @RequestMapping(path = "/{agentName}/jid", method = RequestMethod.GET)
-    Response getJid() {
+    AgentJid.Response getJid() {
         return TestSamples.getJidResponse();
     }
+
+    @RequestMapping(path = "/conferences", method = RequestMethod.POST)
+    AgentCreateConference.Response createConference() {
+        return TestSamples.agentCreateConferenceResponse();
+    }
+
 }

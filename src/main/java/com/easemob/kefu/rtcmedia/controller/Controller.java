@@ -5,8 +5,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.easemob.kefu.rtcmedia.protocol.create.conference.Request;
-import com.easemob.kefu.rtcmedia.protocol.create.conference.Response;
+import com.easemob.kefu.rtcmedia.protocol.CreateConference;
 import com.easemob.kefu.rtcmedia.sample.data.TestSamples;
 
 /**
@@ -17,7 +16,7 @@ import com.easemob.kefu.rtcmedia.sample.data.TestSamples;
 @RestController
 public class Controller {
   @RequestMapping(path = "/v1/webrtc/kefu/call", method = RequestMethod.POST)
-  Response createConference(@RequestBody Request request){
+    CreateConference.Response createConference(@RequestBody CreateConference.Request request) {
     return TestSamples.createConferenceResponse();
   }
 
