@@ -4,7 +4,7 @@
 
     <groupId>com.easemob.kefu</groupId>
     <artifactId>kefu-rtc-media-protocol</artifactId>
-    <version>1.0.1.FINAL</version>
+    <version>1.0.2-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>kefu-rtc-media-protocol</name>
@@ -33,7 +33,7 @@
       <url>https://github.com/wcy123/kefu-rtc-media-protocol</url>
       <connection>scm:git:git@github.com:wcy123/kefu-video-server.git</connection>
       <developerConnection>scm:git:git@github.com:wcy123/kefu-video-server.git</developerConnection>
-      <tag>v1.0.1.FINAL</tag>
+      <tag>HEAD</tag>
     </scm>
 
     <build>
