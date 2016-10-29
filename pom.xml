@@ -4,13 +4,13 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.example</groupId>
-    <artifactId>kefu-video-callback-server</artifactId>
+    <groupId>com.easemob.kefu</groupId>
+    <artifactId>kefu-rtc-media-protocol</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <packaging>jar</packaging>
 
-    <name>kefu-video-callback-server</name>
-    <description>KEFU callback</description>
+    <name>kefu-rtc-media-protocol</name>
+    <description>KEFU protocol between media service and kefu server</description>
 
     <parent>
         <groupId>org.springframework.boot</groupId>
@@ -111,6 +111,18 @@
             </plugin>
         </plugins>
     </build>
+    <distributionManagement>
+        <repository>
+            <id>easemob-releases</id>
+            <name>Easemob Maven Release</name>
+            <url>http://hk.nexus.op.easemob.com/nexus/content/repositories/releases/</url>
+        </repository>
+        <snapshotRepository>
+            <id>easemob-snapshots</id>
+            <name>Easemob Maven Snapshot</name>
+            <url>http://hk.nexus.op.easemob.com/nexus/content/repositories/snapshots/</url>
+        </snapshotRepository>
+    </distributionManagement>
     <dependencies>
         <dependency>
             <groupId>javax.ws.rs</groupId>
