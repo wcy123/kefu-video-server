@@ -76,12 +76,6 @@ public final class CreateConference {
          */
         long timestamp;
 
-        /**
-         * HmacSHA1(argsString(), kefuKey)
-         * kefuKey: MediaService 分配给 客服的key
-         *
-         * DDAY_101_airborne_division_e_company:We_stand_alone_together
-         */
         public String getSign() {
             final String digest =
                     String.join("$", callbackUrl.toString(), callbackArg, users.toString(),
