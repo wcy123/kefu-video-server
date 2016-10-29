@@ -25,3 +25,5 @@ nbdist/
 .mvn/
 *.jar
 *.html
+settings-security.xml
+settings.xml

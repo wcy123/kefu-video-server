@@ -1,4 +1,4 @@
-package com.easemob.kefu.rtcmedia.sample.data;
+package com.easemob.kefu.rtcmedia.data;
 
 import java.net.URI;
 import java.security.DigestException;

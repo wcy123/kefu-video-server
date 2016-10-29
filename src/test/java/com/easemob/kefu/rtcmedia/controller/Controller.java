@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.easemob.kefu.rtcmedia.protocol.CreateConference;
-import com.easemob.kefu.rtcmedia.sample.data.TestSamples;
+import com.easemob.kefu.rtcmedia.data.TestSamples;
 
 /**
  * 程序入口

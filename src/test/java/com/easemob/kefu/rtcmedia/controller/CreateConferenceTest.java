@@ -29,7 +29,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
 
 import com.easemob.kefu.rtcmedia.AbstractRestTest;
 import com.easemob.kefu.rtcmedia.protocol.CreateConference;
-import com.easemob.kefu.rtcmedia.sample.data.TestSamples;
+import com.easemob.kefu.rtcmedia.data.TestSamples;
 import com.fasterxml.jackson.datatype.guava.GuavaModule;
 
 /**

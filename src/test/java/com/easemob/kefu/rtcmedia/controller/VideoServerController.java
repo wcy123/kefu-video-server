@@ -8,11 +8,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.easemob.kefu.rtcmedia.data.TestSamples;
 import com.easemob.kefu.rtcmedia.protocol.AgentCreateConference;
 import com.easemob.kefu.rtcmedia.protocol.AgentJid;
 import com.easemob.kefu.rtcmedia.protocol.GetStatus;
 import com.easemob.kefu.rtcmedia.protocol.UpdateStatus;
-import com.easemob.kefu.rtcmedia.sample.data.TestSamples;
 
 /**
  * 坐席前段呼叫 KEFU 的 API 接口

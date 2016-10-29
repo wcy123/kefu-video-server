@@ -34,7 +34,7 @@ import com.easemob.kefu.rtcmedia.protocol.AgentCreateConference;
 import com.easemob.kefu.rtcmedia.protocol.AgentJid;
 import com.easemob.kefu.rtcmedia.protocol.GetStatus;
 import com.easemob.kefu.rtcmedia.protocol.UpdateStatus;
-import com.easemob.kefu.rtcmedia.sample.data.TestSamples;
+import com.easemob.kefu.rtcmedia.data.TestSamples;
 
 /**
  * 测试用例
