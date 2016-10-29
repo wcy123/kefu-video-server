@@ -1,4 +1,4 @@
-package com.easemob.kefu.rtcmedia.protocol;
+package com.easemob.kefu.rtcmedia.controller;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
@@ -28,6 +28,7 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
 import com.easemob.kefu.rtcmedia.AbstractRestTest;
+import com.easemob.kefu.rtcmedia.protocol.CreateConference;
 import com.easemob.kefu.rtcmedia.sample.data.TestSamples;
 import com.fasterxml.jackson.datatype.guava.GuavaModule;
 
