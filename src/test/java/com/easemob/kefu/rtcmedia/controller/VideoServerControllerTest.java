@@ -30,11 +30,11 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 import com.easemob.kefu.rtcmedia.AbstractRestTest;
+import com.easemob.kefu.rtcmedia.data.TestSamples;
 import com.easemob.kefu.rtcmedia.protocol.AgentCreateConference;
 import com.easemob.kefu.rtcmedia.protocol.AgentJid;
 import com.easemob.kefu.rtcmedia.protocol.GetStatus;
 import com.easemob.kefu.rtcmedia.protocol.UpdateStatus;
-import com.easemob.kefu.rtcmedia.data.TestSamples;
 
 /**
  * 测试用例
@@ -119,6 +119,7 @@ public class VideoServerControllerTest extends AbstractRestTest {
                         preprocessResponse(prettyPrint()),
                         requestFields(
                                 reqFields.withPath("agentId").description("坐席 ID"),
+                                reqFields.withPath("visitorId").description("访客 ID"),
                                 reqFields.withPath("mediaType")
                                         .description("客服请求 服务类型：VIDEO，AUDIO"),
                                 reqFields.withPath("msgId").description(" msg id 是哪一条消息触发的这次呼叫"),

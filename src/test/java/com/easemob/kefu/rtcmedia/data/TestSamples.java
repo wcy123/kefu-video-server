@@ -115,6 +115,7 @@ public class TestSamples {
     public static AgentCreateConference.Request agentCreateConferenceRequest() {
         return AgentCreateConference.Request.builder()
                 .agentId(agentId())
+                .visitorId(visitorId())
                 .mediaType(CreateConference.MediaType.VIDEO)
                 .msgId(msgId())
                 .orgName(ORG_NAME)

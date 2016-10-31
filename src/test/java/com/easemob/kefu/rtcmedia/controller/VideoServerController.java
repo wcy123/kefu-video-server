@@ -33,7 +33,8 @@ public class VideoServerController {
     }
 
     @RequestMapping(path = "/conferences", method = RequestMethod.POST)
-    AgentCreateConference.Response createConference() {
+    AgentCreateConference.Response createConference(
+            @RequestBody AgentCreateConference.Request request) {
         return TestSamples.agentCreateConferenceResponse();
     }
 

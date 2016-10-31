@@ -29,6 +29,10 @@ public final class AgentCreateConference {
          */
         UUID agentId;
         /**
+         * 访客 ID
+         */
+        UUID visitorId;
+        /**
          * 呼叫类型 AUDIO or VIDEO 现在都是 Video
          */
         CreateConference.MediaType mediaType;
