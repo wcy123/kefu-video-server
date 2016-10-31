@@ -7,13 +7,12 @@ public enum IntegrationStatus{
 	SUCCESS(0,"0000", "process access"),
 	GROWING_TENANTID_NULL(1,"0001", "tenantid is null"),
 	GROWING_TENANTID_NOT_ANGET(2,"0002", " the tenant did not contain agent"),
-	GROWING_TENANTID_REMOTE_ERROR(3,"0003", "tenant:[%s], remote GrowingIO fail"),
-	GROWING_TENANTID_REGEDIT_ERROR(4,"0004", "tenant:[%s],did not GrowingIO regedit fail"),
-	GROWING_TENANTID_REGEDIT_CONN_ERROR(5,"0005", "tenant:[%s], remote Growing fail ,detail:[%s]"),
-	GROWING_TENANTID_USER_ERROR(6,"0006", "tenant:%d,%s,did not GrowingIO User"),
-	GROWING_TENANTID_EVENT_ERROR(7,"0007", "tenant:%d,%s,did not GrowingIO User Tracks "),
-	GROWING_TENANTID_REGEDIT_OPTION_ERROR(8,"0008", "did not regedit growingioEnable Option  "),
-	GROWING_TENANTID_USER_TRACK_NOT_UPDATE(9,"0009","did not update tenant:%d,user:%s tracks"),
+	GROWING_TENANTID_REMOTE_ERROR(3,"0003", "tenant:[%d] remote GrowingIO fail"),
+	GROWING_TENANTID_REGEDIT_ERROR(4,"0004", "tenant:[%d] did not GrowingIO regedit fail"),
+	GROWING_TENANTID_REGEDIT_CONN_ERROR(5,"0005", "tenant:[%d] remote Growing fail ,detail:[%s]"),
+	GROWING_TENANTID_USER_ERROR(6,"0006", "tenant:[%d],servicesession:[%s]did not GrowingIO User"),
+	GROWING_TENANTID_EVENT_ERROR(7,"0007", "tenant:[%d],servicesession:[%s] did not GrowingIO user tracks "),
+	GROWING_TENANTID_REGEDIT_OPTION_ERROR(8,"0008", "tenant:[%d] did not regedit growingioEnable option  "),
 	NOKNOW(1,"9999", "no know");
 
 	

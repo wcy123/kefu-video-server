@@ -117,8 +117,7 @@ public class GrowingIOServiceController extends AbstractController  {
         
         return IntegrationStatus.SUCCESS==status
             ?createSucResponse(respdata.getEntity(), HttpStatus.OK)
-            :createFailResponseByStatus(status, HttpStatus.FORBIDDEN,tenantId,serviceSessionId);
-		
+            :createFailResponseByStatus(status, HttpStatus.OK,tenantId,serviceSessionId);
 	}
 	
 	private ResponseEntity<IntegrationResp> createFailResponseByStatus(IntegrationStatus integrationStatus,
