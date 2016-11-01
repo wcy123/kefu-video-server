@@ -55,9 +55,16 @@ public final class UpdateStatus {
 
         /**
          * 回调时间, 在 timeoutMs 毫秒只能, 必须再次回调, 否则 kefu server 认为连接异常
+         *
+         * 此参数：要求MediaService需要在此时间内，对客服server发送状态更新。
+         * 由于实现方式未定，暂时 先确定为：MediaService方 超时间 + 客户端ping间隔 + 2 * 超时检查时间
+         *
+         * 目前：客户端 在收到MediaService后，会定时对 MediaServie发送ping消息。MediaService会在收到后，更新时间戳。
+         * 若：长时间未收到， MediaServie会进行超时检查。
+         * MediaService收到ping后会主动向客服Server发送 状态更新回调
+         *
          */
         long callbackTimeoutMs;
-        State state;
 
         // ------------- 华丽的分割线 ----------
         @JsonPOJOBuilder(withPrefix = "")

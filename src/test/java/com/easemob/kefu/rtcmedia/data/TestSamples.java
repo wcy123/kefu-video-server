@@ -82,7 +82,7 @@ public class TestSamples {
 
     public static UpdateStatus.Request updateStatusRequest() {
         return UpdateStatus.Request.builder()
-                .state(State.INIT)
+                .state(State.RINGING)
                 .callbackArg(callbackArg()).build();
     }
 
@@ -152,7 +152,7 @@ public class TestSamples {
 
     public static GetStatus.Response getStatusResponse() {
         return GetStatus.Response.builder()
-                .state(State.INIT)
+                .state(State.RINGING)
                 .build();
     }
 }

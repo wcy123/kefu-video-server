@@ -58,6 +58,7 @@ public final class CreateConference {
         String callbackArg;
         /**
          * 回调时间, 在 callbackTimeoutMs 毫秒只能, 必须再次回调, 否则 kefu server 认为连接异常
+         * 同UpdateStatus.Response.callbackTimeoutMs
          */
         long callbackTimeoutMs;
         /**
