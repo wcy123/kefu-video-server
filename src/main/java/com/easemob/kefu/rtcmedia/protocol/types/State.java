@@ -4,7 +4,7 @@ public enum State {
     /**
      * 用户 发送请求，等待客服接收
      */
-    WAIT_KF,
+    INIT,
 
     /**
      * 会议创建，客服调用 MediaService后，如果 返回正常的SID，则认为这个会议已创建
@@ -21,7 +21,7 @@ public enum State {
     /**
      * MediaService 已建立两方链接，双方正在通话
      */
-    CALLING,
+    CONNECTED,
     /**
      * 1.一方 挂断，会议正常关闭
      * 2.一方 协商失败，主动向MediaService发送通话终止
