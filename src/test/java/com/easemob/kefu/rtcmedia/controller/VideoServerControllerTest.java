@@ -14,8 +14,6 @@ import static org.springframework.restdocs.request.RequestDocumentation.pathPara
 import static org.springframework.restdocs.request.RequestDocumentation.requestParameters;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.util.UUID;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.SpringApplicationConfiguration;
@@ -154,7 +152,7 @@ public class VideoServerControllerTest extends AbstractRestTest {
                 TestSamples.getStates();
         mockMvc.perform(
                 RestDocumentationRequestBuilders.get(endpoint,
-                        UUID.fromString("3f9ce5b9-a979-4088-b47f-df23f37094e8")))
+                        "3f9ce5b9-a979-4088-b47f-df23f37094e8"))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andDo(MockMvcRestDocumentation.document(docName,
                         preprocessResponse(prettyPrint()),

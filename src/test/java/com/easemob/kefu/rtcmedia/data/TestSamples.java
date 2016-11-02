@@ -3,7 +3,6 @@ package com.easemob.kefu.rtcmedia.data;
 import java.net.URI;
 import java.security.DigestException;
 import java.util.Arrays;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.ws.rs.core.UriBuilder;
@@ -126,16 +125,16 @@ public class TestSamples {
                 .build();
     }
 
-    private static UUID msgId() {
-        return UUID.fromString("cafebabe-bb24-4762-987e-bb0bd71d1234");
+    private static String msgId() {
+        return "cafebabe-bb24-4762-987e-bb0bd71d1234";
     }
 
-    private static UUID visitorId() {
-        return UUID.fromString("cafebabe-bb24-4762-987e-bb0bd71da8fc");
+    private static String visitorId() {
+        return "cafebabe-bb24-4762-987e-bb0bd71da8fc";
     }
 
-    private static UUID agentId() {
-        return UUID.fromString("cafebabe-bb24-4762-987e-bb0bd71d1234");
+    private static String agentId() {
+        return "cafebabe-bb24-4762-987e-bb0bd71d1234";
     }
 
     public static AgentCreateConference.Response agentCreateConferenceResponse() {

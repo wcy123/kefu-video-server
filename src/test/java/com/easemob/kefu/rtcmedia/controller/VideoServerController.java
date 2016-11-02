@@ -62,7 +62,7 @@ public class VideoServerController {
      * @return 响应
      */
     @RequestMapping(path = "/conference/{msgId}", method = RequestMethod.GET)
-    GetStatus.Response getStatus(@PathVariable UUID msgId) {
+    GetStatus.Response getStatus(@PathVariable String msgId) {
         return TestSamples.getStatusResponse();
     }
 }

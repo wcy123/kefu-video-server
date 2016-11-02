@@ -27,11 +27,11 @@ public final class AgentCreateConference {
         /**
          * 坐席 ID
          */
-        UUID agentId;
+        String agentId;
         /**
          * 访客 ID
          */
-        UUID visitorId;
+        String visitorId;
         /**
          * 呼叫类型 AUDIO or VIDEO 现在都是 Video
          */
@@ -40,7 +40,7 @@ public final class AgentCreateConference {
         /**
          * msg id 是那一条消息触发的这次呼叫vi
          */
-        UUID msgId;
+        String msgId;
         /**
          * JID 中的组织名
          */
