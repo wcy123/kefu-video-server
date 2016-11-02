@@ -1,0 +1,80 @@
+= 数据库建模
+王纯业;
+:doctype: book
+@asciidoctor_options[:backend] = 'xhtml'
+:snippets: ../../target/generated-snippets
+:toc:
+:toclevels: 4
+:source-highlighter: highlight.js
+
+
+``` java
+@Entity
+@Data
+public class RtcMediaEntity {
+    @Id
+    @GeneratedValue
+    private Long id;
+    private String agentId;
+    private String mediaType;
+    private String orgName;
+    private String appName;
+    private String visitorUserName;
+    private String agentUserName;
+    private State state;
+
+    @OneToMany
+    private List<RtcMediaEventLog> logs;
+
+    @CreatedDate
+    @Column(name = "created",
+            columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+            insertable = false,
+            updatable = false)
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date created;
+
+    @LastModifiedDate
+    @Version
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "LAST_MODIFIED", insertable = false, updatable = true)
+    private Date lastModified;
+}
+```
+
+
+```java
+@Entity
+@Data
+public class RtcMediaAgentJid {
+    @Id
+    @GeneratedValue
+    private Long id;
+    private String agentName;
+    private String orgName;
+    private String appName;
+    private String userName; // <orgName>#<appName>_<userName>
+
+}
+```
+
+```java
+@Data
+@Entity
+public class RtcMediaEventLog {
+    @Id
+    @GeneratedValue
+    private Long id;
+
+    @CreatedDate
+    @Column(name = "created",
+            columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+            insertable = false,
+            updatable = false)
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date timestamp;
+
+    private String action;
+    private String name;
+}
+```

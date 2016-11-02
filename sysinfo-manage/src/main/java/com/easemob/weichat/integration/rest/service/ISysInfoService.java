@@ -1,10 +1,7 @@
 package com.easemob.weichat.integration.rest.service;
 
-import org.springframework.http.ResponseEntity;
-
 import com.easemob.weichat.integration.data.NewVersionInfo;
 import com.easemob.weichat.integration.data.ReceivedId;
-import com.easemob.weichat.models.data.ApiResponse;
 
 public interface ISysInfoService {
     NewVersionInfo doCheckVerInfoRead(Integer tenantId, String agentId);

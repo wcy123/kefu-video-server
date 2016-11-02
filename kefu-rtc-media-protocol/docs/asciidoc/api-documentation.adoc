@@ -1,0 +1,62 @@
+= Media Server 和 Kefu 系统之间的  API 调用
+杨尚山,符宁, 王纯业;
+:doctype: book
+@asciidoctor_options[:backend] = 'xhtml'
+:snippets: ../../target/generated-snippets
+:toc:
+:toclevels: 4
+:source-highlighter: highlight.js
+
+== 建立会议对象
+
+KEFU 呼叫 Media Server 的 API
+
+* 请求
+
+include::{snippets}/create_conference_post/curl-request.adoc[]
+
+** headers
+
+无
+
+**  字段说明
+
+include::{snippets}/create_conference_post/request-fields.adoc[]
+
+* 响应
+
+include::{snippets}/create_conference_post/http-response.adoc[]
+
+** 字段说明, TYPE = OK
+
+include::{snippets}/create_conference_post/response-fields.adoc[]
+
+== 更新会议对象
+
+MediaServer  呼叫 KEFU 的 API
+
+* 请求
+
+
+include::{snippets}/update_conference_post/curl-request.adoc[]
+
+** path parameters
+
+include::{snippets}/update_conference_post/path-parameters.adoc[]
+
+** headers
+
+无
+
+**  字段说明
+
+include::{snippets}/update_conference_post/request-fields.adoc[]
+
+* 响应
+
+include::{snippets}/update_conference_post/http-response.adoc[]
+
+** 字段说明, TYPE = OK
+
+include::{snippets}/update_conference_post/response-fields.adoc[]
+

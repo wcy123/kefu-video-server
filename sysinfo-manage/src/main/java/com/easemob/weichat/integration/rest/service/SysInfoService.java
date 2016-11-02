@@ -1,17 +1,15 @@
 package com.easemob.weichat.integration.rest.service;
 
 import java.util.concurrent.TimeUnit;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 import com.easemob.weichat.integration.data.NewVersionInfo;
 import com.easemob.weichat.integration.data.ReceivedId;
-import com.easemob.weichat.models.data.ApiResponse;
 
 import lombok.extern.slf4j.Slf4j;
 /**
@@ -155,7 +153,7 @@ public class SysInfoService implements ISysInfoService {
         String savedId = (String) newVersionRedisTemplate.boundHashOps(latestVerisonInfo).get(idKey);
         log.info("hashname {}  idkey {}  contentKey{}",latestVerisonInfo, idKey, contentKey);
         for (String tenantId : newVersionRedisTemplate.boundSetOps(tenantSetKey).members()){
-            String agentKey = agentSetPrefix + ":" + tenantId.toString() + ":" + savedId;
+            String agentKey = agentSetPrefix + ":" + tenantId + ":" + savedId;
             newVersionRedisTemplate.delete(agentKey);
         }
     }

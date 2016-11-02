@@ -1,0 +1,178 @@
+= 视频邀请的消息格式定义
+王纯业;
+:doctype: book
+@asciidoctor_options[:backend] = 'xhtml'
+:snippets: ../../target/generated-snippets
+:toc:
+:toclevels: 4
+:source-highlighter: highlight.js
+
+== 访客发起呼叫
+
+访客端发送的消息
+
+```json
+{
+  "to": "a1",
+  "from": "974921511a354e06a4676b19f849a8cc",
+  "bodies": [
+      {
+          "msg": "",
+          "type": "txt"
+      }
+  ],
+  "ext": {
+        "type": "rtcmedia/video",
+        "msgtype": {
+            "track": {
+                "title": "测试track2",
+                "price": "￥235",
+                "item_url": "http://www.baidu.com",
+                "desc": "假两件衬衣+V领毛衣上衣",
+                "img_url": "https://www.baidu.com/img/bdlogo.png"
+            }
+        },
+        "imageName": "mallImage2.png",
+        "weichat": {
+            "queueName": "shouhou",
+            "visitor": {
+                "qq": "10000",
+                "companyName": "环信",
+                "trueName": "李明",
+                "phone": "13512345678",
+                "userNickname": "我",
+                "email": "abc@123.com"
+            }
+        }
+    }
+}
+```
+
+坐席端收到的消息
+
+```json
+{
+    "msgId": "4a473acf-a4a8-4d26-a16c-88339304ff6d",
+    "tenantId": 11795,
+    "chatGroupId": 357,
+    "sessionServiceId": "7759688c-d842-4e6d-809b-0bab53ecb3f9",
+    "messageType": "ChatMessage",
+    "fromUser": {
+        "tenantId": 11795,
+        "userId": "ab082532-c410-4a4d-93eb-2b92397b46e9",
+        "userType": "Visitor",
+        "userScope": "Tenant",
+        "nicename": "我",
+        "scope": "Tenant",
+        "status": "Disable",
+        "roles": "",
+        "bizId": "11795"
+    },
+    "toUser": {
+        "tenantId": 11795,
+        "userId": "_1",
+        "userType": "All",
+        "userScope": "Tenant",
+        "nicename": "所有人",
+        "scope": "Tenant",
+        "status": "Disable",
+        "roles": "",
+        "bizId": "11795"
+    },
+    "contentType": "application/easemob-msg",
+    "body": {
+        "bodies": [
+            {
+                "msg": "",
+                "type": "txt"
+            }
+        ],
+        "ext": {
+            "type": "rtcmedia/video",
+            "msgtype": {
+                "track": {
+                    "title": "测试track2",
+                    "price": "￥235",
+                    "item_url": "http://www.baidu.com",
+                    "desc": "假两件衬衣+V领毛衣上衣",
+                    "img_url": "https://www.baidu.com/img/bdlogo.png"
+                }
+            },
+            "imageName": "mallImage2.png",
+            "weichat": {
+                "msgId": null,
+                "originType": null,
+                "visitor": {
+                    "source": null,
+                    "openid": null,
+                    "mp": null,
+                    "userNickname": "我",
+                    "trueName": "李明",
+                    "sex": null,
+                    "qq": "10000",
+                    "email": "abc@123.com",
+                    "phone": "13512345678",
+                    "companyName": "环信",
+                    "description": null,
+                    "weixin": null,
+                    "tags": null,
+                    "callback_user": "974921511a354e06a4676b19f849a8cc",
+                    "gr_user_id": null
+                },
+                "agent": null,
+                "queueId": null,
+                "queueName": "shouhou",
+                "agentUsername": null,
+                "ctrlType": null,
+                "ctrlArgs": null,
+                "event": null,
+                "metadata": null,
+                "callcenter": null,
+                "language": null,
+                "service_session": null,
+                "html_safe_body": {
+                    "type": "txt",
+                    "msg": ""
+                },
+                "msg_id_for_ack": null,
+                "ack_for_msg_id": null
+            }
+        },
+        "from": "974921511a354e06a4676b19f849a8cc",
+        "to": "a1",
+        "channelType": "easemob",
+        "timestamp": 1477733218132,
+        "tenantId": 11795,
+        "originType": "app",
+        "to_jid": "easemob123#app1_a1@easemob.com",
+        "msg_id": "258421388090540560",
+        "channel_id": 10687,
+        "channel_name": "name"
+    },
+    "chatGroupSeqId": 114,
+    "sessionServiceSeqId": 96,
+    "createDateTime": 1477733231515,
+    "timestamp": 1477733231515,
+    "createMicroTimestamp": 1477733231515250
+}
+```
+
+.字段说明
+[options="header,footer"]
+|===========================
+| 字段名称    | 字段类型 | 含义 | 例子
+| originType  | String  | 客户端类型 | "app/webIM"
+| to_jid      | String  | 可以用于提取 orgName, appName | "easemob123#app1_a1@easemob.com"
+| from        | String  | 访客用户名称 | webim-visitor
+| msgId | UUID | 客服系统的 msg Id | "4a473acf-a4a8-4d26-a16c-88339304ff6d"
+| ext.type. | Constant | "rtcmedia/video" | 表示视频呼叫请求的扩展消息 rtcmedia/audio 表示语音，以后再扩展
+|===========================
+
+== 注意事项
+
+- `msgId` 是这个消息的唯一标识, 坐席客户端可以通过  API 访问得到这个 msgId 下的信息
+** 会议状态
+** 会议历史记录(可选, 第一期)
+- 唯一标识访客 ++<orgName>#<appName>_<from>++ 和 ++originType++ 目前支持 `webIm`
+- `type` 目前支持 `rtcmedia/video`
+- `from` 有 IM SDK 填写

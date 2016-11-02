@@ -35,7 +35,7 @@ public class NewRegisterUserTaskController extends AbstractController{
 
         apiResponse.setStatus(ApiResponse.STATUS_OK);
         apiResponse.setEntity(newUserTaskService.doGetNewUserTaskList(tenantId, agentId));
-        return new ResponseEntity<ApiResponse>(apiResponse, HttpStatus.OK);
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
     @RequestMapping(value = "/v1/tenants/{tenantId}/agents/{agentId}/tasksdone", method = RequestMethod.POST)
@@ -47,6 +47,6 @@ public class NewRegisterUserTaskController extends AbstractController{
         newUserTaskService.doAgentUserTaskDone(tenantId, agentId, agentUserTaskDone.getTaskDone());
         
         apiResponse.setStatus(ApiResponse.STATUS_OK);
-        return new ResponseEntity<ApiResponse>(apiResponse, HttpStatus.OK);
+        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 }
