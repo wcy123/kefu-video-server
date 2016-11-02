@@ -103,6 +103,7 @@ public class TestSamples {
                 .orgName(ORG_NAME)
                 .appName(APP_NAME)
                 .userName(AGENT_USER_NAME)
+                .password("1234")
                 .build();
     }
 

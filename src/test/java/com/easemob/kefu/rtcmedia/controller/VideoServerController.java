@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.easemob.kefu.rtcmedia.data.TestSamples;
@@ -28,7 +29,10 @@ public class VideoServerController {
      * @return
      */
     @RequestMapping(path = "/{agentName}/jid", method = RequestMethod.GET)
-    AgentJid.Response getJid() {
+    AgentJid.Response getJid(@PathVariable String agentName,
+                             @RequestParam String orgName,
+                             @RequestParam String appName,
+                             @RequestParam String imServiceNumber) {
         return TestSamples.getJidResponse();
     }
 

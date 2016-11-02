@@ -11,6 +11,7 @@ import static org.springframework.restdocs.payload.PayloadDocumentation.requestF
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
 import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
+import static org.springframework.restdocs.request.RequestDocumentation.requestParameters;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.UUID;
@@ -88,16 +89,25 @@ public class VideoServerControllerTest extends AbstractRestTest {
                 new AbstractRestTest.ConstrainedFields(
                         AgentJid.Response.class);
         mockMvc.perform(
-                RestDocumentationRequestBuilders.get(endpoint, "kefu@easemob.com"))
+                RestDocumentationRequestBuilders.get(endpoint, "kefu@easemob.com")
+                        .param("orgName", TestSamples.ORG_NAME)
+                        .param("appName", TestSamples.APP_NAME)
+                        .param("imServiceNumber", TestSamples.AGENT_USER_NAME))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andDo(MockMvcRestDocumentation.document(docName, preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
                         pathParameters(
                                 parameterWithName("agentName").description("坐席登陆名称, 一般是电子邮件地址")),
+                        requestParameters(
+                                parameterWithName("orgName").description("JID 里面的组织名"),
+                                parameterWithName("appName").description("JID 里面的应用名"),
+                                parameterWithName("imServiceNumber")
+                                        .description("Gateway 里面的 im 服务号, 就是消息格式中的 body.to 的字段")),
                         responseFields(
                                 resFields.withPath("orgName").description("JID 里面的组织名"),
                                 resFields.withPath("appName").description("JID 里面的应用名"),
-                                resFields.withPath("userName").description("JID 里面的用户名"))));
+                                resFields.withPath("userName").description("JID 里面的用户名"),
+                                resFields.withPath("password").description("JID 的密码"))));
     }
 
     @Test

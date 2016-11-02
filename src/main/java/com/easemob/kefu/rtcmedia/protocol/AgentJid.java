@@ -24,7 +24,7 @@ public final class AgentJid {
         String orgName;
         String appName;
         String userName;
-
+        String password;
         @JsonPOJOBuilder(withPrefix = "")
         public static final class ResponseBuilder {
         }

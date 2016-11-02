@@ -21,6 +21,10 @@ include::{snippets}/get_jid_get/http-request.adoc[]
 
 include::{snippets}/get_jid_get/path-parameters.adoc[]
 
+** request parameters
+
+include::{snippets}/get_jid_get/request-parameters.adoc[]
+
 
 * 响应
 

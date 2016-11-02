@@ -7,6 +7,8 @@ import static org.springframework.restdocs.operation.preprocess.Preprocessors.pr
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.prettyPrint;
 import static org.springframework.restdocs.payload.PayloadDocumentation.requestFields;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
+import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
+import static org.springframework.restdocs.request.RequestDocumentation.requestParameters;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -53,6 +55,7 @@ public class CreateConferenceTest extends AbstractRestTest {
     mockMvc.perform(post(endpoint).contentType(APPLICATION_JSON).content(content))
         .andExpect(status().isOk())
         .andDo(document(docName, preprocessRequest(prettyPrint()), preprocessResponse(prettyPrint()),
+
             requestFields(
                 reqFields.withPath("mediaType").description("客服请求 服务类型：VIDEO，AUDIO"),
                 reqFields.withPath("callbackUrl").description("media service 回调 kefu server 的回调地址"),
